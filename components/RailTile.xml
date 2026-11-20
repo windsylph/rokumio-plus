@@ -25,12 +25,11 @@
             translation="[38, 14]" />
         <Label
             id="railLabel"
-            translation="[0, 62]"
-            width="120"
-            height="28"
+            translation="[12, 62]"
+            width="96"
+            height="26"
             horizAlign="center"
             vertAlign="center"
-            font="font:SmallestBoldSystemFont"
             visible="false" />
     </children>
 </component>

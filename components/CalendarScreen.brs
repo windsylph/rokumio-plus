@@ -216,10 +216,13 @@ sub RenderHero(rowIndex as integer, itemIndex as integer)
     line = EpisodeMarker(e.season, e.episode)
     if e.title <> invalid and e.title <> "" then line = line + "  ·  " + StringOf(e.title)
     line = line + "  —  " + FullDayLabel(e.date)
+    ' The card's art slot is landscape: hand it the series backdrop so the
+    ' portrait poster is never zoom-cropped into it.
     m.hero.callFunc("Render", {
         name: e.seriesName
         title: e.seriesName
         poster: e.poster
+        background: e.background
         type: "series"
         description: line
     })

@@ -59,8 +59,15 @@ sub ApplyLayout(hasIcon as boolean, hasText as boolean)
     m.icon.loadWidth = iconSize
     m.icon.loadHeight = iconSize
 
-    textY = Int((m.tileHeight - 40) / 2)
-    if textY < 0 then textY = 0
+    ' The label spans the face and centers on it vertically, so it can never
+    ' ride over the pill's rounded top/bottom; slim chips get smaller type.
+    textY = 4
+    m.text.height = bgH
+    if m.tileHeight < 66
+        m.text.font = "font:SmallSystemFont"
+    else
+        m.text.font = "font:MediumSystemFont"
+    end if
     if hasIcon and hasText
         m.icon.translation = [16, iconY]
         m.iconBg.width = m.tileWidth - 8

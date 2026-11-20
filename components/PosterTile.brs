@@ -79,10 +79,12 @@ sub ApplyTileSize()
     m.progressFill.width = w - 24
     m.corners.width = w
     m.corners.height = h
-    m.focusRing.width = w + 12
-    m.focusRing.height = h + 12
+    ' Inside the artwork: a ring drawn past the cell edge is clipped by the
+    ' list at its left/top boundary (the first column sits flush with it).
+    m.focusRing.width = w
+    m.focusRing.height = h
     m.caption.width = w
-    m.caption.translation = [0, h + 12]
+    m.caption.translation = [0, h + 9]
     m.watchedBadge.translation = [w - 62, 8]
     if m.seeMoreGroup <> invalid
         m.seeMoreBg.width = w

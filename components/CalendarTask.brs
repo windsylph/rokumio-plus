@@ -13,12 +13,17 @@ sub load()
         toDate = m.top.toDate
         for each item in m.top.series
             if item = invalid or item.metaId = invalid then continue for
+            ' One retry: a single slow answer must not drop a whole series
+            ' from the calendar.
             answer = invalid
-            try
-                answer = store.GetMeta(m.top.addonAddress, "series", item.metaId)
-            catch fetchError
-                answer = invalid
-            end try
+            for attempt = 1 to 2
+                try
+                    answer = store.GetMeta(m.top.addonAddress, "series", item.metaId)
+                catch fetchError
+                    answer = invalid
+                end try
+                if answer <> invalid and answer.ok = true and answer.meta <> invalid then exit for
+            end for
             if answer = invalid or answer.ok <> true or answer.meta = invalid then continue for
             meta = answer.meta
             if meta.videos = invalid or GetInterface(meta.videos, "ifArray") = invalid then continue for
@@ -26,6 +31,8 @@ sub load()
             if seriesName = invalid or seriesName = "" then seriesName = meta.name
             poster = item.poster
             if (poster = invalid or poster = "") and meta.poster <> invalid then poster = meta.poster
+            background = ""
+            if meta.background <> invalid and GetInterface(meta.background, "ifString") <> invalid then background = meta.background
             for each video in meta.videos
                 if video = invalid then continue for
                 released = video.released
@@ -46,6 +53,7 @@ sub load()
                     metaId: item.metaId
                     seriesName: seriesName
                     poster: poster
+                    background: background
                     season: season
                     episode: number
                     title: title

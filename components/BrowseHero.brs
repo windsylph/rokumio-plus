@@ -91,21 +91,21 @@ sub ApplyPanelMode()
         return
     end if
     if card <> invalid then card.visible = true
+    ' Art inset 14px inside the rounded card (16:9, 536x302), so the card's
+    ' corners frame it instead of square art poking past them.
     for each node in [m.heroPoster, m.heroPosterPrev]
-        node.translation = [1296, 60]
-        node.width = 564
-        node.height = 318
+        node.translation = [1310, 74]
+        node.width = 536
+        node.height = 302
     end for
     if fadeLR <> invalid then fadeLR.visible = false
-    if fadeBT <> invalid
-        fadeBT.translation = [1296, 238]
-        fadeBT.width = 564
-        fadeBT.height = 140
-    end if
+    if fadeBT <> invalid then fadeBT.visible = false
     if m.heroScrim <> invalid then m.heroScrim.visible = false
-    m.heroTitle.translation = [1328, 330]
+    ' Title sits under the art on one line (ellipsized), never over it.
+    m.heroTitle.translation = [1328, 398]
     m.heroTitle.width = 500
-    m.heroTitle.height = 100
+    m.heroTitle.height = 56
+    m.heroTitle.wrap = false
     HeroPanelPlace()
 end sub
 

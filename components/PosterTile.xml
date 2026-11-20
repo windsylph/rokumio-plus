@@ -44,7 +44,7 @@
              focused tile whose art had not rendered yet. -->
         <Group id="artless">
             <Rectangle id="tileBg" width="270" height="405" />
-            <Label id="titleText" width="246" height="389" translation="[18, 8]" horizAlign="center" vertAlign="middle" wrap="true" font="font:MediumSystemFont" />
+            <Label id="titleText" width="246" height="389" translation="[18, 8]" horizAlign="center" vertAlign="center" wrap="true" font="font:MediumSystemFont" />
         </Group>
         <!-- Never hide this poster. It stays visible from the start and paints
              nothing until it has a bitmap. Gating its visibility on loadStatus
@@ -110,9 +110,9 @@
              indicator (Stremio: 0.2rem white box-shadow), drawn by the tile
              itself so it hugs the artwork and not the caption below. -->
         <Poster id="corners" width="270" height="405" uri="pkg:/images/ui/poster_corners.9.png" />
-        <Poster id="focusRing" width="282" height="417" translation="[-6, -6]" uri="pkg:/images/ui/focus_ring.9.png" blendColor="0xFFFFFFE6" visible="false" />
+        <Poster id="focusRing" width="270" height="405" translation="[0, 0]" uri="pkg:/images/ui/focus_ring_inner.9.png" blendColor="0xFFFFFFF2" visible="false" />
         <!-- Title under the artwork, as on Stremio's board (title-bar 4rem).
              Drawn below the cell; screens leave room for it in their row gap. -->
-        <Label id="caption" width="270" height="64" translation="[0, 417]" horizAlign="center" vertAlign="top" wrap="true" maxLines="2" font="font:SmallestSystemFont" />
+        <Label id="caption" width="270" height="64" translation="[0, 414]" horizAlign="center" vertAlign="top" wrap="true" maxLines="2" font="font:SmallestSystemFont" />
     </children>
 </component>

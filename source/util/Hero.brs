@@ -405,31 +405,42 @@ end sub
 
 ' Panel (Stremio MetaPreview card) positions; see BrowseHero.ApplyPanelMode.
 sub HeroPanelPlace()
+    ' Everything stacks under the art (which ends at y=376) with one rhythm:
+    ' logo/title, then meta, rating, genres and description 14-18px apart.
     logoShown = m.heroLogo.visible = true
-    top = 340
+    top = 398
     if logoShown
+        ' Fit the logo into 500x96 keeping its aspect ratio.
+        w = m.heroLogo.width
         h = m.heroLogo.height
-        if h > 130
-            m.heroLogo.width = Int(m.heroLogo.width * 130 / h)
-            m.heroLogo.height = 130
+        if w > 0 and h > 0
+            scale = 96 / h
+            if w * scale > 500 then scale = 500 / w
+            m.heroLogo.width = Int(w * scale)
+            m.heroLogo.height = Int(h * scale)
         end if
-        if m.heroLogo.width > 500
-            m.heroLogo.height = Int(m.heroLogo.height * 500 / m.heroLogo.width)
-            m.heroLogo.width = 500
-        end if
-        m.heroLogo.translation = [1328, 334]
-        top = 334 + m.heroLogo.height + 26
+        m.heroLogo.translation = [1328, top]
+        top = top + m.heroLogo.height + 18
     else
-        top = 446
+        top = top + 56 + 10
     end if
     m.heroMeta.translation = [1328, top]
     m.heroMeta.width = 500
-    m.heroRating.translation = [1328, top + 42]
-    m.heroGenres.translation = [1328, top + 92]
-    m.heroGenres.width = 500
-    m.heroDescription.translation = [1328, top + 140]
+    ratingShown = m.heroRating.visible = true
+    rowY = top + 40
+    if ratingShown
+        m.heroRating.translation = [1328, rowY]
+        rowY = rowY + 48
+    end if
+    genresShown = m.heroGenres.visible = true
+    if genresShown
+        m.heroGenres.translation = [1328, rowY]
+        m.heroGenres.width = 500
+        rowY = rowY + 44
+    end if
+    m.heroDescription.translation = [1328, rowY + 4]
     m.heroDescription.width = 500
-    m.heroDescription.height = 1000 - (top + 140)
+    m.heroDescription.height = 1010 - (rowY + 4)
 end sub
 
 sub HeroFitLogo()

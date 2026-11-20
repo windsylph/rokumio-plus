@@ -9,7 +9,7 @@
         <field id="series" type="array" />
         <field id="fromDate" type="string" value="" />
         <field id="toDate" type="string" value="" />
-        <!-- { ok, entries: [{ date, metaId, seriesName, poster, season, episode, title }] } -->
+        <!-- { ok, entries: [{ date, metaId, seriesName, poster, background, season, episode, title }] } -->
         <field id="result" type="assocarray" alwaysNotify="true" />
     </interface>
     <script type="text/brightscript" uri="pkg:/source/stores/Transport.bs" />

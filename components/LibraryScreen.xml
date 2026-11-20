@@ -55,7 +55,7 @@
 
         <!-- Filter chips + dropdown (FilterBar), Discover-style long chips.
              Declared last so the dropdown paints over the results grid. -->
-        <FilterBar id="filterBar" translation="[90, 62]" chipItemWidth="320" chipItemHeight="48" menuItemHeight="48" />
+        <FilterBar id="filterBar" translation="[90, 62]" chipItemWidth="300" chipItemHeight="60" menuItemHeight="56" />
 
         <!-- Contextual shortcut hint: the asterisk keycap, shown only while
              grid focus is past the first row, where Up is consumed by the

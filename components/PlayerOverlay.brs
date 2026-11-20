@@ -28,7 +28,7 @@ sub init()
     m.buttonRow = m.top.FindNode("buttonRow")
 
     m.nextPopup = m.top.FindNode("nextPopup")
-    m.top.FindNode("nextBg").color = "0x101318EE"
+    m.top.FindNode("nextBg").color = "0x0F0D20EE"
     m.nextHeading = m.top.FindNode("nextHeading")
     m.nextTitle = m.top.FindNode("nextTitle")
     m.nextCountdown = m.top.FindNode("nextCountdown")
@@ -41,7 +41,8 @@ sub init()
     m.nextCountdown.color = "0xFFFFFFB3"
 
     m.menu = m.top.FindNode("menu")
-    m.top.FindNode("menuBg").color = "0x0D1013F5"
+    ' Stremio's modal surface (--modal-background-color #0F0D20).
+    m.top.FindNode("menuBg").color = "0x0F0D20F2"
     m.menuTitle = m.top.FindNode("menuTitle")
     m.menuTitle.color = t.textWhite
     m.menuRowsGroup = m.top.FindNode("menuRows")
@@ -49,10 +50,11 @@ sub init()
     for r = 0 to MENU_ROWS() - 1
         row = CreateObject("roSGNode", "Group")
         row.translation = [0, r * 70]
-        bg = CreateObject("roSGNode", "Rectangle")
+        bg = CreateObject("roSGNode", "Poster")
+        bg.uri = "pkg:/images/ui/card_sm.9.png"
         bg.width = 504
         bg.height = 64
-        bg.color = "0x00000000"
+        bg.blendColor = "0x00000000"
         label = CreateObject("roSGNode", "Label")
         label.translation = [24, 0]
         label.width = 400
@@ -700,11 +702,11 @@ sub PaintMenu()
             row.label.text = m.menuLabels[idx]
             row.check.visible = idx = m.menuChecked
             if idx = m.menuSel
-                row.bg.color = accent
+                row.bg.blendColor = accent
                 row.label.color = Theme().onAccent
                 row.check.blendColor = Theme().onAccent
             else
-                row.bg.color = "0x00000000"
+                row.bg.blendColor = "0x00000000"
                 row.label.color = "0xFFFFFFE6"
                 row.check.blendColor = accent
             end if
