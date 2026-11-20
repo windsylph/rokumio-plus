@@ -156,7 +156,10 @@
             "loading": "Loading…",
             "emptyCatalogRows": "No catalog rows are showing. Install catalog add-ons or enable rows in Settings → Home.",
             "refreshing": "Refreshing…",
-            "seeMore": "See more"
+            "seeMore": "See more",
+            "railCalendar": "Calendar",
+            "railBoard": "Board",
+            "searchPlaceholder": "Search or paste link"
         },
         "homeRows": {
             "title": "Home catalog rows",
@@ -274,7 +277,20 @@
             "playbackFailedCode": "{message}  (code {code})",
             "directDialogTitle": "Play this video directly?",
             "directDialogDirect": "Play direct (original file)",
-            "directDialogRemux": "Remux (converted on the server)"
+            "directDialogRemux": "Remux (converted on the server)",
+            "nextEpisode": "Next episode",
+            "playNow": "Play now",
+            "dismiss": "Dismiss",
+            "nextIn": "Starts in {seconds}s",
+            "subtitles": "Subtitles",
+            "audio": "Audio",
+            "audioDefault": "Default",
+            "speed": "Playback speed",
+            "speedValue": "{value}×",
+            "episodes": "Episodes",
+            "off": "Off",
+            "loadingNext": "Loading the next episode…",
+            "nextUnavailable": "No stream found for the next episode on this add-on."
         },
         "discover": {
             "title": "Discover",
@@ -348,6 +364,16 @@
             "Top": "Top",
             "Latest": "Latest",
             "Trending": "Trending"
+        },
+        "calendar": {
+            "title": "Calendar",
+            "loading": "Loading your calendar…",
+            "emptyLibrary": "Add series to your Library to see their new episodes here.",
+            "nothingScheduled": "No episodes of your Library series in the last week or the next month.",
+            "today": "Today",
+            "tomorrow": "Tomorrow",
+            "yesterday": "Yesterday",
+            "dayDate": "{month} {day}"
         }
     },
     "es": {
@@ -507,7 +533,10 @@
             "loading": "Cargando…",
             "emptyCatalogRows": "No se muestran filas de catálogo. Instala add-ons de catálogo o activa filas en Ajustes → Inicio.",
             "refreshing": "Actualizando…",
-            "seeMore": "Ver más"
+            "seeMore": "Ver más",
+            "railCalendar": "Calendario",
+            "railBoard": "Inicio",
+            "searchPlaceholder": "Busca o pega un enlace"
         },
         "homeRows": {
             "title": "Catálogos de Home",
@@ -625,7 +654,20 @@
             "playbackFailedCode": "{message}  (código {code})",
             "directDialogTitle": "¿Reproducir este video directamente?",
             "directDialogDirect": "Directo (archivo original)",
-            "directDialogRemux": "Remux (convertido en el servidor)"
+            "directDialogRemux": "Remux (convertido en el servidor)",
+            "nextEpisode": "Siguiente episodio",
+            "playNow": "Reproducir",
+            "dismiss": "Descartar",
+            "nextIn": "Empieza en {seconds}s",
+            "subtitles": "Subtítulos",
+            "audio": "Audio",
+            "audioDefault": "Predeterminado",
+            "speed": "Velocidad",
+            "speedValue": "{value}×",
+            "episodes": "Episodios",
+            "off": "Desactivados",
+            "loadingNext": "Cargando el siguiente episodio…",
+            "nextUnavailable": "Este complemento no tiene un stream para el siguiente episodio."
         },
         "discover": {
             "title": "Descubrir",
@@ -699,6 +741,16 @@
             "Top": "Top",
             "Latest": "Recientes",
             "Trending": "Tendencias"
+        },
+        "calendar": {
+            "title": "Calendario",
+            "loading": "Cargando tu calendario…",
+            "emptyLibrary": "Añade series a tu Biblioteca para ver aquí sus nuevos episodios.",
+            "nothingScheduled": "No hay episodios de tus series en la última semana ni en el próximo mes.",
+            "today": "Hoy",
+            "tomorrow": "Mañana",
+            "yesterday": "Ayer",
+            "dayDate": "{day} {month}"
         }
     }
 }

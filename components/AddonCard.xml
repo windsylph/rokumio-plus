@@ -14,12 +14,12 @@
     <script type="text/brightscript" uri="pkg:/source/util/Helpers.brs" />
 
     <children>
-        <Poster id="tileBorder" width="1600" height="320" uri="pkg:/images/chip.9.png">
-            <Poster id="tileFace" width="1584" height="304" translation="[8, 8]" uri="pkg:/images/chip.9.png" />
+        <Poster id="tileBorder" width="1600" height="320" uri="pkg:/images/ui/card_sm.9.png">
+            <Poster id="tileFace" width="1584" height="304" translation="[8, 8]" uri="pkg:/images/ui/card_sm.9.png" />
 
             <Poster
                 id="logoBg"
-                uri="pkg:/images/chip.9.png"
+                uri="pkg:/images/ui/card_sm.9.png"
                 width="184"
                 height="184"
                 translation="[32, 68]" />

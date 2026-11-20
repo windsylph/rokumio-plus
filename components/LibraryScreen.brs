@@ -288,6 +288,9 @@ end sub
 ' is no logo/description/rating/genres, so the hero degrades gracefully.
 sub RenderLibraryHero(item as object)
     if item = invalid then return
+    ' Stremio's Library has no preview hero (hidden in the XML); skip the
+    ' backdrop load it would otherwise do on every focus move.
+    if m.hero = invalid or not m.hero.visible then return
     meta = {
         name: item.name
         title: item.name

@@ -14,7 +14,7 @@
     <script type="text/brightscript" uri="pkg:/source/core/Theme.bs" />
 
     <children>
-        <Rectangle id="rowFace" width="992" height="102" translation="[4, 4]" />
+        <Poster id="rowFace" width="992" height="102" translation="[4, 4]" uri="pkg:/images/ui/card_sm.9.png" />
         <Label
             id="rowTitle"
             width="600"

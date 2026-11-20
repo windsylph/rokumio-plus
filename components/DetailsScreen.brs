@@ -45,7 +45,7 @@ sub init()
     m.textsLanguage = ""
 
     t = Theme()
-    m.top.FindNode("detailsBg").color = t.screenBg
+    m.top.FindNode("detailsBg").color = "0x00000000"
     m.bgScrim.color = t.scrim
     m.detailName.color = t.textPrimary
     m.detailType.color = t.textSecondary

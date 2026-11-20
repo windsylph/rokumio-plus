@@ -42,10 +42,10 @@ sub UpdateLook()
     t = Theme()
     if m.top.itemHasFocus
         m.border.blendColor = t.textWhite
-        m.face.blendColor = t.tileFaceFocus
+        m.face.blendColor = "0x221F38FF"
     else
         m.border.blendColor = t.borderSoft
-        m.face.blendColor = t.tileFace
+        m.face.blendColor = "0xFFFFFF0D"
     end if
     if m.top.rowHasFocus then m.top.opacity = 1.0 else m.top.opacity = 0.55
     if m.top.itemContent <> invalid and m.top.itemContent.aired = false then m.top.opacity = 0.5 * m.top.opacity

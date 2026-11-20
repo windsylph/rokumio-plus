@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="CalendarTask" extends="Task">
+    <!-- Builds the Calendar off the UI thread: one meta fetch per saved series,
+         then every episode whose release date falls inside [fromDate, toDate]
+         (ISO yyyy-mm-dd, compared as text), sorted by date. -->
+    <interface>
+        <field id="addonAddress" type="string" value="" />
+        <!-- [{ metaId, name, poster }] -->
+        <field id="series" type="array" />
+        <field id="fromDate" type="string" value="" />
+        <field id="toDate" type="string" value="" />
+        <!-- { ok, entries: [{ date, metaId, seriesName, poster, season, episode, title }] } -->
+        <field id="result" type="assocarray" alwaysNotify="true" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/source/stores/Transport.bs" />
+    <script type="text/brightscript" uri="pkg:/source/stores/VideoIdCodec.bs" />
+    <script type="text/brightscript" uri="pkg:/source/stores/EpisodesStore.bs" />
+    <script type="text/brightscript" uri="pkg:/source/util/AddonJson.brs" />
+    <script type="text/brightscript" uri="pkg:/components/CalendarTask.brs" />
+</component>

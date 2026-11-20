@@ -27,8 +27,8 @@
     <script type="text/brightscript" uri="pkg:/source/core/TileSize.bs" />
 
     <children>
-        <Rectangle id="libraryBg" width="1920" height="1080" color="0x0" />
-        <BrowseHero id="hero" posterLoadWidth="270" posterLoadHeight="405" />
+        <Rectangle id="libraryBg" width="1920" height="1080" color="0x00000000" />
+        <BrowseHero id="hero" visible="false" posterLoadWidth="270" posterLoadHeight="405" />
         <Label
             id="libraryStatus"
             translation="[150, 20]"
@@ -43,19 +43,19 @@
              Discover. -->
         <RowList
             id="libraryGrid"
-            translation="[90, 632]"
+            translation="[90, 150]"
             numRows="2"
             itemSize="[1800, 405]"
-            itemSpacing="[0, 18]"
+            itemSpacing="[0, 94]"
             rowItemSize="[[270, 405]]"
             rowItemSpacing="[[18, 0]]"
             showRowLabel="false"
-            drawFocusFeedback="true"
+            drawFocusFeedback="false"
             itemComponentName="PosterTile" />
 
         <!-- Filter chips + dropdown (FilterBar), Discover-style long chips.
              Declared last so the dropdown paints over the results grid. -->
-        <FilterBar id="filterBar" translation="[90, 552]" chipItemWidth="320" chipItemHeight="48" menuItemHeight="48" />
+        <FilterBar id="filterBar" translation="[90, 62]" chipItemWidth="320" chipItemHeight="48" menuItemHeight="48" />
 
         <!-- Contextual shortcut hint: the asterisk keycap, shown only while
              grid focus is past the first row, where Up is consumed by the
@@ -86,7 +86,7 @@
              filter/sort yields no saved items. -->
         <Label
             id="libraryEmpty"
-            translation="[90, 720]"
+            translation="[90, 480]"
             width="1740"
             height="90"
             horizAlign="center"

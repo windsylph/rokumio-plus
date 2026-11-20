@@ -30,7 +30,7 @@
     <script type="text/brightscript" uri="pkg:/source/core/TileSize.bs" />
 
     <children>
-        <Rectangle id="searchBg" width="1920" height="1080" color="0x0" />
+        <Rectangle id="searchBg" width="1920" height="1080" color="0x00000000" />
 
         <!-- Live-search debounce: every keystroke restarts this window, so a
              typed word fans out once, not per letter, and stale tasks are
@@ -115,13 +115,13 @@
             translation="[750, 136]"
             numRows="2"
             itemSize="[1080, 405]"
-            itemSpacing="[0, 96]"
+            itemSpacing="[0, 172]"
             rowItemSize="[[270, 405]]"
             rowItemSpacing="[[18, 0]]"
             showRowLabel="[true]"
             rowLabelOffset="[[0, 32]]"
             rowLabelFont="font:MediumBoldSystemFont"
-            drawFocusFeedback="true"
+            drawFocusFeedback="false"
             itemComponentName="PosterTile" />
 
         <!-- Empty state: the quiet "type something" line, centered in the

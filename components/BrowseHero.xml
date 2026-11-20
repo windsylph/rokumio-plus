@@ -3,6 +3,9 @@
     <interface>
         <field id="posterLoadWidth" type="integer" value="1120" />
         <field id="posterLoadHeight" type="integer" value="630" />
+        <!-- Stremio MetaPreview mode: the hero becomes a card on the right
+             (Discover/Calendar) instead of a full-width backdrop. -->
+        <field id="panel" type="boolean" value="false" onChange="ApplyPanelMode" />
         <function name="SetStores" />
         <function name="Render" />
         <function name="Clear" />
@@ -20,6 +23,7 @@
         <Timer id="heroTitleGrace" duration="0.18" repeat="false" />
         <PosterLoader id="heroPosterLoader" />
         <PosterLoader id="heroLogoLoader" />
+        <Poster id="heroCard" visible="false" translation="[1296, 60]" width="564" height="980" uri="pkg:/images/ui/panel.9.png" blendColor="0xFFFFFF0F" />
         <!-- Previous hero background kept visible while next loads/fades in. -->
         <Poster
             id="heroPosterPrev"

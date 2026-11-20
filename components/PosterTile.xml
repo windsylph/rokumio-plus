@@ -103,5 +103,16 @@
             <Label id="seeMorePlus" width="270" height="180" translation="[0, 90]" horizAlign="center" vertAlign="center" text="+" font="font:LargeBoldSystemFont" />
             <Label id="seeMoreLabel" width="230" height="70" translation="[20, 260]" horizAlign="center" vertAlign="top" wrap="true" font="font:SmallSystemFont" />
         </Group>
+
+        <!-- Stremio card chrome. Roku cannot clip a Poster to a rounded rect, so
+             a 9-patch paints the four corners in the backdrop color over the
+             artwork (Stremio: border-radius 0.75rem). The ring is the focus
+             indicator (Stremio: 0.2rem white box-shadow), drawn by the tile
+             itself so it hugs the artwork and not the caption below. -->
+        <Poster id="corners" width="270" height="405" uri="pkg:/images/ui/poster_corners.9.png" />
+        <Poster id="focusRing" width="282" height="417" translation="[-6, -6]" uri="pkg:/images/ui/focus_ring.9.png" blendColor="0xFFFFFFE6" visible="false" />
+        <!-- Title under the artwork, as on Stremio's board (title-bar 4rem).
+             Drawn below the cell; screens leave room for it in their row gap. -->
+        <Label id="caption" width="270" height="64" translation="[0, 417]" horizAlign="center" vertAlign="top" wrap="true" maxLines="2" font="font:SmallestSystemFont" />
     </children>
 </component>

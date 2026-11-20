@@ -37,7 +37,8 @@ sub init()
     m.chunk = 6
     ' The grid's row budget: RowList translation x 90 + itemSize width 1800,
     ' with 18px gaps (rowItemSpacing), fits 6 standard poster tiles per row.
-    m.rowWidth = 1800
+    ' Stremio layout: a 4-column grid left of the MetaPreview card (x 1296).
+    m.rowWidth = 1170
     m.rowGap = 18
     m.sources = []
     m.sourcesSignature = ""

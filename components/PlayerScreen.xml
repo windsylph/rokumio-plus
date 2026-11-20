@@ -3,9 +3,9 @@
     <!-- Minimal player pushed from StreamsScreen with { stream, serverAddress,
          metaType, metaId, videoId, season, episode, position, name, poster,
          logo, ... }. The stream is resolved here (logo pulse while the torrent
-         engine warms up), then playback runs on Roku's native player chrome —
-         the pause screen, seek/trick-play, and Options/captions dialog belong
-         to the platform. Pops on Back and records the watched position through
+         engine warms up), then playback runs under PlayerOverlay — the
+         Stremio-style control bar, skips, subtitle/audio/speed/episode menus
+         and the "Next episode" pop-up. Pops on Back and records the watched position through
          LibraryStore.SetPosition. The buffering logo is the one branded piece
          that stays.
          A static child of MainScene, reused across plays: OnBackPressed only
@@ -37,8 +37,8 @@
             id="video"
             width="1920"
             height="1080"
-            enableUI="true"
-            enableTrickPlay="true" />
+            enableUI="false"
+            enableTrickPlay="false" />
         <Label
             id="playerStatus"
             translation="[40, 812]"
@@ -46,6 +46,9 @@
             height="44"
             font="font:MediumSystemFont"
             horizAlign="center" />
+
+        <!-- App-owned transport and menus (the Video runs with enableUI off). -->
+        <PlayerOverlay id="overlay" />
 
         <Group id="bufferingGroup" visible="false" translation="[680, 360]">
             <Poster

@@ -29,11 +29,11 @@ end sub
 sub UpdateLook()
     t = Theme()
     if m.top.itemHasFocus
-        m.face.color = t.textPrimary
-        m.title.color = t.screenBg
-        m.value.color = t.screenBg
+        m.face.blendColor = t.accent
+        m.title.color = t.onAccent
+        m.value.color = t.onAccent
     else
-        m.face.color = t.tileFace
+        m.face.blendColor = "0xFFFFFF0D"
         m.title.color = t.textPrimary
         m.value.color = t.textSecondary
     end if

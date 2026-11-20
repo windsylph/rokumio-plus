@@ -116,11 +116,12 @@ end sub
 sub UpdateLook()
     t = Theme()
     if m.top.itemHasFocus
-        m.border.blendColor = t.textWhite
-        m.face.blendColor = t.tileFaceFocus
+        m.border.blendColor = "0xFFFFFFE6"
+        m.face.blendColor = "0x221F38FF"
     else
-        m.border.blendColor = t.borderSoft
-        m.face.blendColor = t.tileFace
+        ' Stremio stream item: rgba(255,255,255,0.05), no border at rest.
+        m.border.blendColor = "0x00000000"
+        m.face.blendColor = "0xFFFFFF0D"
     end if
     if m.top.rowHasFocus then m.top.opacity = 1.0 else m.top.opacity = 0.55
 

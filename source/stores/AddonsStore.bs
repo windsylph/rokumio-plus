@@ -154,11 +154,19 @@ class AddonsStore
         if parts[0] <> "http" and parts[0] <> "https" then return ""
         rest = parts[1]
         if rest = "" then return ""
-        host = rest
-        colon = rest.InStr(":")
+        ' The host ends at the first "/" (or "?"), so a port is only what sits
+        ' between ":" and that boundary — "localhost:7000/x/manifest.json" has
+        ' port "7000", not "7000/x/manifest.json".
+        slash = rest.InStr("/")
+        query = rest.InStr("?")
+        if query >= 0 and (slash < 0 or query < slash) then slash = query
+        authority = rest
+        if slash >= 0 then authority = rest.Left(slash)
+        host = authority
+        colon = authority.InStr(":")
         if colon >= 0
-            host = rest.Left(colon)
-            portStr = rest.Mid(colon + 1)
+            host = authority.Left(colon)
+            portStr = authority.Mid(colon + 1)
             if portStr = "" then return ""
             for i = 0 to portStr.Len() - 1
                 if portStr.Mid(i, 1) < "0" or portStr.Mid(i, 1) > "9" then return ""

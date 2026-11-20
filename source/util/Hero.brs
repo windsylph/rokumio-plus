@@ -400,6 +400,36 @@ sub HeroApplyLayout(mode as string, showTitle = true as boolean)
     m.heroDescription.translation = [166, 333]
     m.heroDescription.width = 620
     m.heroDescription.height = 185
+    if m.heroPanel = true then HeroPanelPlace()
+end sub
+
+' Panel (Stremio MetaPreview card) positions; see BrowseHero.ApplyPanelMode.
+sub HeroPanelPlace()
+    logoShown = m.heroLogo.visible = true
+    top = 340
+    if logoShown
+        h = m.heroLogo.height
+        if h > 130
+            m.heroLogo.width = Int(m.heroLogo.width * 130 / h)
+            m.heroLogo.height = 130
+        end if
+        if m.heroLogo.width > 500
+            m.heroLogo.height = Int(m.heroLogo.height * 500 / m.heroLogo.width)
+            m.heroLogo.width = 500
+        end if
+        m.heroLogo.translation = [1328, 334]
+        top = 334 + m.heroLogo.height + 26
+    else
+        top = 446
+    end if
+    m.heroMeta.translation = [1328, top]
+    m.heroMeta.width = 500
+    m.heroRating.translation = [1328, top + 42]
+    m.heroGenres.translation = [1328, top + 92]
+    m.heroGenres.width = 500
+    m.heroDescription.translation = [1328, top + 140]
+    m.heroDescription.width = 500
+    m.heroDescription.height = 1000 - (top + 140)
 end sub
 
 sub HeroFitLogo()
@@ -420,6 +450,7 @@ sub HeroFitLogo()
     m.heroDescription.height = 175
     m.heroLogo.visible = true
     m.heroTitle.visible = false
+    if m.heroPanel = true then HeroPanelPlace()
 end sub
 
 sub HeroResetLogoLayout()

@@ -19,7 +19,7 @@
     <script type="text/brightscript" uri="pkg:/source/core/Theme.bs" />
 
     <children>
-        <Rectangle id="pairBg" width="1920" height="1080" color="0x0" />
+        <Rectangle id="pairBg" width="1920" height="1080" color="0x00000000" />
 
         <!-- The full-width vertical group centers every child by its own
              measured size, so wider translations stay centered with no manual

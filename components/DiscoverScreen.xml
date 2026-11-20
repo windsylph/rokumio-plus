@@ -20,9 +20,9 @@
     <script type="text/brightscript" uri="pkg:/source/core/TileSize.bs" />
 
     <children>
-        <Rectangle id="discoverBg" width="1920" height="1080" color="0x0" />
+        <Rectangle id="discoverBg" width="1920" height="1080" color="0x00000000" />
         <Timer id="discoverRetryTimer" duration="2.0" repeat="false" />
-        <BrowseHero id="hero" />
+        <BrowseHero id="hero" panel="true" posterLoadWidth="564" posterLoadHeight="318" />
 
         <Label
             id="discoverStatus"
@@ -33,17 +33,17 @@
 
         <RowList
             id="discoverGrid"
-            translation="[90, 632]"
-            numRows="1"
+            translation="[90, 150]"
+            numRows="2"
             itemSize="[1800, 405]"
-            itemSpacing="[0, 18]"
+            itemSpacing="[0, 94]"
             rowItemSize="[[270, 405]]"
             rowItemSpacing="[[18, 0]]"
             showRowLabel="false"
-            drawFocusFeedback="true"
+            drawFocusFeedback="false"
             itemComponentName="PosterTile" />
 
-        <FilterBar id="filterBar" translation="[90, 552]" chipItemWidth="320" chipItemHeight="48" menuItemHeight="48" />
+        <FilterBar id="filterBar" translation="[90, 62]" chipItemWidth="320" chipItemHeight="48" menuItemHeight="48" />
 
         <!-- Contextual shortcut hint: the asterisk keycap, one self-contained
              image. It sits left of the first filter chip and appears only

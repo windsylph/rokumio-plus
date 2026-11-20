@@ -27,7 +27,7 @@
             loadWidth="1080"
             loadHeight="320"
             loadDisplayMode="limitSize"
-            uri="pkg:/images/stream-card-ring.png">
+            uri="pkg:/images/ui/card_sm.9.png">
             <Poster
                 id="tileFace"
                 width="1064"
@@ -36,7 +36,7 @@
                 loadHeight="304"
                 loadDisplayMode="limitSize"
                 translation="[8, 8]"
-                uri="pkg:/images/stream-card.png" />
+                uri="pkg:/images/ui/card_sm.9.png" />
             <!-- The title never scrolls, so it sits outside the clip and simply
                  truncates with an ellipsis when it is too long (width lets
                  EmojiLabel do the truncating). -->

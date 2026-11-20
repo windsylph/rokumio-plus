@@ -29,7 +29,7 @@
             loadWidth="1760"
             loadHeight="300"
             loadDisplayMode="limitSize"
-            uri="pkg:/images/episode-card-ring.png">
+            uri="pkg:/images/ui/card_sm.9.png">
             <Poster
                 id="tileFace"
                 width="1744"
@@ -38,7 +38,7 @@
                 loadHeight="284"
                 loadDisplayMode="limitSize"
                 translation="[8, 8]"
-                uri="pkg:/images/episode-card.png" />
+                uri="pkg:/images/ui/card_sm.9.png" />
             <!-- The artless unit: the thumbnail-sized face plus the S#E#/name
                  text, shown until the thumbnail has painted. HIDDEN as a unit
                  the moment the poster reports ready, so the face genuinely

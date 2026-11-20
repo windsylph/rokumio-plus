@@ -13,7 +13,7 @@
     <script type="text/brightscript" uri="pkg:/source/util/HomeCatalogs.brs" />
 
     <children>
-        <Rectangle id="homeRowsBg" width="1920" height="1080" color="0x0" />
+        <Rectangle id="homeRowsBg" width="1920" height="1080" color="0x00000000" />
 
         <Label
             id="homeRowsTitle"

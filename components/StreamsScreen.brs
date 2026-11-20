@@ -49,7 +49,7 @@ sub init()
     m.bg = m.top.FindNode("streamBg")
     m.scrim = m.top.FindNode("bgScrim")
     t = Theme()
-    m.bg.color = t.screenBg
+    m.bg.color = "0x00000000"
     m.scrim.color = t.scrim
     m.headTitle.color = t.textPrimary
     m.headSub.color = t.textSecondary
@@ -864,10 +864,15 @@ sub PushPlayer(index as integer, playMode as string)
         end if
     end if
 
+    streamAddonAddress = ""
+    if m.providers <> invalid and m.activeIndex >= 0 and m.activeIndex < m.providers.Count() then streamAddonAddress = m.providers[m.activeIndex].address
+
     m.top.pushRequest = {
         screen: "playerScreen"
         params: {
             stream: m.streams[index]
+            metaAddonAddress: m.params.addonAddress
+            streamAddonAddress: streamAddonAddress
             directPlayMode: playMode
             serverAddress: serverAddress
             metaType: m.params.metaType

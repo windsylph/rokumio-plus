@@ -1,37 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component name="RailTile" extends="Group">
-    <!-- Wide icon tile for the Home left rail, standalone (no RowList): the
-         rail is a Group of these, focused one at a time. Collapsed, the icon
-         sits centered; expanded, it steps left and the section name shows on
-         every tile. No per-tile background: the rail is the surface. -->
+    <!-- One button of the Stremio-style vertical nav bar (stremio-web
+         VerticalNavBar/NavTabButton): icon at 35% when idle; the focused or
+         selected button turns the icon purple, shows its label under it and,
+         when focused, sits on a rounded overlay (rgba(255,255,255,0.05)+). -->
     <interface>
         <field id="focused" type="boolean" alwaysNotify="true" />
+        <field id="selected" type="boolean" alwaysNotify="true" />
+        <!-- Kept for HomeScreen's rail calls; the Stremio bar never widens. -->
         <field id="expanded" type="boolean" alwaysNotify="true" />
         <function name="SetTile" />
     </interface>
-
     <script type="text/brightscript" uri="pkg:/components/RailTile.brs" />
     <script type="text/brightscript" uri="pkg:/source/core/Theme.bs" />
-
     <children>
-        <Timer id="stepTimer" duration="0.016" repeat="true" />
-
+        <Poster id="railFace" width="104" height="96" translation="[8, 0]" uri="pkg:/images/ui/panel.9.png" blendColor="0xFFFFFF1F" visible="false" />
         <Poster
             id="railGlyph"
-            width="48"
-            height="48"
-            loadWidth="48"
-            loadHeight="48"
+            width="44"
+            height="44"
+            loadWidth="44"
+            loadHeight="44"
             loadDisplayMode="limitSize"
-            translation="[32, 16]" />
+            translation="[38, 14]" />
         <Label
             id="railLabel"
-            translation="[84, 16]"
-                width="228"
-                height="48"
-                vertAlign="center"
-                scaleRotateCenter="[0, 40]"
-                font="font:MediumSystemFont"
-                visible="false" />
+            translation="[0, 62]"
+            width="120"
+            height="28"
+            horizAlign="center"
+            vertAlign="center"
+            font="font:SmallestBoldSystemFont"
+            visible="false" />
     </children>
 </component>

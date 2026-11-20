@@ -122,6 +122,20 @@ sub Test_Addons_Install()
     Harness_Equal(addons.GetAll().Count(), 3, "built-ins plus the new one")
 end sub
 
+sub Test_Addons_InstallWithPortAndPath()
+    Harness_Suite("AddonsStore.Install accepts a host:port address with a path")
+    manifestUrl = "http://192.168.1.20:7000/abc/manifest.json"
+    script = [
+        { method: "GET", url: manifestUrl, ok: true, status: 200, json: ManifestFixture("com.example.local", "Local"), error: "" }
+    ]
+    addons = AddonsStore(ScriptedTransport(script), invalid)
+    result = addons.Install(manifestUrl)
+    Harness_Ok(result.ok, "install ok with a port and a path")
+    Harness_Equal(addons.Get("com.example.local").address, "http://192.168.1.20:7000/abc", "base keeps the port and path")
+    Harness_Equal(addons.Install("http://host:70a0/manifest.json").error, "invalid addon address", "a non-numeric port is still rejected")
+    Harness_Equal(addons.Install("http://host:/manifest.json").error, "invalid addon address", "an empty port is still rejected")
+end sub
+
 sub Test_Addons_InstallKeepsDisplayMetadata()
     Harness_Suite("AddonsStore.Install retains the manifest's tile metadata")
     manifestUrl = "https://addon.example.com/manifest.json"

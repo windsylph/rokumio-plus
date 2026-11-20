@@ -23,12 +23,17 @@ sub init()
     m.seeMoreBg = m.top.FindNode("seeMoreBg")
     m.seeMorePlus = m.top.FindNode("seeMorePlus")
     m.seeMoreLabel = m.top.FindNode("seeMoreLabel")
+    m.corners = m.top.FindNode("corners")
+    m.focusRing = m.top.FindNode("focusRing")
+    m.caption = m.top.FindNode("caption")
 
     t = Theme()
     m.tileBg.color = t.tileFace
     m.titleText.color = t.textPrimary
-    m.progressTrack.color = t.progressTrack
-    m.progressFill.color = t.progressFill
+    ' Stremio's progress bar: white on a 30% white track, inset from the edges.
+    m.progressTrack.color = "0xFFFFFF4D"
+    m.progressFill.color = "0xFFFFFFE6"
+    m.caption.color = t.textPrimary
     m.watchedPlate.color = t.glyphPlate
     if m.seeMoreBg <> invalid then m.seeMoreBg.color = t.tileFace
     if m.seeMorePlus <> invalid then m.seeMorePlus.color = t.accent
@@ -66,10 +71,18 @@ sub ApplyTileSize()
     m.tileBg.height = h
     m.titleText.width = w - 24
     m.titleText.height = h - 16
-    m.progressTrack.width = w
-    m.progressTrack.translation = [0, h - 8]
-    m.progressFill.translation = [0, h - 8]
-    m.progressFill.width = w
+    m.progressTrack.width = w - 24
+    m.progressTrack.height = 7
+    m.progressTrack.translation = [12, h - 19]
+    m.progressFill.translation = [12, h - 19]
+    m.progressFill.height = 7
+    m.progressFill.width = w - 24
+    m.corners.width = w
+    m.corners.height = h
+    m.focusRing.width = w + 12
+    m.focusRing.height = h + 12
+    m.caption.width = w
+    m.caption.translation = [0, h + 12]
     m.watchedBadge.translation = [w - 62, 8]
     if m.seeMoreGroup <> invalid
         m.seeMoreBg.width = w
@@ -92,7 +105,10 @@ sub ApplyTileSize()
 end sub
 
 sub UpdateLook()
-    if m.top.rowHasFocus then m.top.opacity = 1.0 else m.top.opacity = 0.55
+    ' Stremio keeps every row at full strength; focus is the white ring alone.
+    m.top.opacity = 1.0
+    m.focusRing.visible = m.top.itemHasFocus = true
+    m.caption.opacity = 0.9
 end sub
 
 sub onItemHasFocusChanged()
@@ -105,6 +121,8 @@ end sub
 
 sub onItemContentChanged()
     if m.top.itemContent = invalid then return
+    m.caption.text = StringOf(m.top.itemContent.title)
+    m.caption.visible = m.top.itemContent.seeMore <> true
     if m.top.itemContent.seeMore = true
         m.requestedPosterUri = ""
         if m.posterLoader <> invalid then m.posterLoader.uri = ""
@@ -199,11 +217,11 @@ sub UpdateOverlays()
     if m.top.itemContent = invalid then return
     progress = m.top.itemContent.progress
     if progress <> invalid and progress > 0 and progress <= 1
-        m.progressFill.width = m.poster.width * progress
+        m.progressFill.width = (m.poster.width - 24) * progress
         m.progressTrack.visible = true
         m.progressFill.visible = true
     else
-        m.progressFill.width = m.poster.width
+        m.progressFill.width = m.poster.width - 24
         m.progressTrack.visible = false
         m.progressFill.visible = false
     end if

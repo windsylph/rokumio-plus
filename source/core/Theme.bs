@@ -18,36 +18,39 @@
 function Theme() as object
     if m._theme = invalid
         m._theme = {
-            accent: "0x2BD675FF"
-            accentFocus: "0x5BEF95FF"
-            accentClear: "0x2BD67500"
-            accentDim: "0x2BD6754D"
-            accentFaint: "0x2BD67533"
-            accentWarm: "0xFFCE6BFF"
+            ' Stremio's palette (stremio-web src/App/styles.less): near-black
+            ' violet backgrounds, the purple primary accent, white foreground.
+            accent: "0x7B5BF5FF"
+            accentFocus: "0x9A82FFFF"
+            accentClear: "0x7B5BF500"
+            accentDim: "0x7B5BF54D"
+            accentFaint: "0x7B5BF533"
+            accentWarm: "0xF6C700FF"
             accentInfo: "0x5BCBF4FF"
-            textPrimary: "0xE9F2ECFF"
-            textSecondary: "0x8FA399FF"
+            onAccent: "0xFFFFFFFF"
+            textPrimary: "0xFFFFFFE6"
+            textSecondary: "0xFFFFFF80"
             textWhite: "0xFFFFFFFF"
-            chipActiveBg: "0xFFFFFF38"
-            chipActiveText: "0xE9F2ECFF"
-            danger: "0xE05A41FF"
-            screenBg: "0x0A0F0CFF"
-            tileFace: "0x0B110DFF"
-            tileFaceFocus: "0x1D1F1DFF"
-            itemFace: "0x233329FF"
-            dropdownBg: "0x101813FF"
+            chipActiveBg: "0xFFFFFF26"
+            chipActiveText: "0xFFFFFFE6"
+            danger: "0xDC2626FF"
+            screenBg: "0x0C0B11FF"
+            tileFace: "0x15131EFF"
+            tileFaceFocus: "0x2A2547FF"
+            itemFace: "0x1A173EFF"
+            dropdownBg: "0x0F0D20FF"
             playerBg: "0x000000FF"
-            scrim: "0x00000099"
+            scrim: "0x0C0B1199"
             progressTrack: "0x00000073"
-            progressFill: "0x46E0A3FF"
-            glyphPlate: "0x000000A6"
-            borderSoft: "0xFFFFFF26"
-            navBg: "0x060806C0"
-            navBgExpanded: "0x060806FF"
-            navIdle: "0x66736AFF"
-            navLabelActive: "0xD5DED8FF"
-            toastBg: "0x101813D9"
-            segmentIdle: "0x2A3530FF"
+            progressFill: "0x7B5BF5FF"
+            glyphPlate: "0x0C0B11A6"
+            borderSoft: "0xFFFFFF1A"
+            navBg: "0x0C0B11C0"
+            navBgExpanded: "0x0F0D20FF"
+            navIdle: "0xFFFFFF66"
+            navLabelActive: "0xFFFFFFE6"
+            toastBg: "0x0F0D20E6"
+            segmentIdle: "0x221F33FF"
         }
     end if
     return m._theme
@@ -67,7 +70,7 @@ function AppPalette() as object
         DialogItemColor: c.accent
         DialogTextColor: c.textPrimary
         DialogFocusColor: c.accent
-        DialogFocusItemColor: c.screenBg
+        DialogFocusItemColor: c.onAccent
         DialogSecondaryTextColor: c.textSecondary
         DialogSecondaryItemColor: c.accentDim
         DialogInputFieldColor: c.dropdownBg
@@ -77,7 +80,7 @@ function AppPalette() as object
         PrimaryTextColor: c.textPrimary
         SecondaryItemColor: c.textSecondary
         FocusColor: c.accent
-        FocusItemColor: c.screenBg
+        FocusItemColor: c.onAccent
     }
     return palette
 end function

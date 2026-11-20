@@ -15,11 +15,12 @@
 ' field; playback state is surfaced through the status label so a broken stream
 ' is a message, not a black screen.
 '
-' Transport is the platform's: the Video runs with enableUI and enableTrickPlay
-' on, so OK/play-pause show the native pause screen, Left/Right and FF/RW use
-' the native seek/trick-play UI, and "*" opens Roku's Options overlay with its
-' certification-mandated captions dialog. The screen only owns the resolve
-' (pre-video) phase and teardown; Back records the position and pops.
+' Transport is PlayerOverlay's: the Video runs with enableUI off and the overlay
+' draws a Stremio-style control bar (play/pause, 10s skips, scrubbing, next
+' episode) with subtitle / audio / speed / episode menus and the "Next episode"
+' pop-up. The overlay takes focus on the first "playing"; this screen owns the
+' resolve (pre-video) phase, episode switching and teardown. Back records the
+' position and pops.
 '
 ' Subtitle captions are fetched off-thread (SubtitleLoaderTask) from an add-on
 ' advertising the "subtitles" resource (OpenSubtitles v3 is the built-in, an
@@ -59,6 +60,16 @@ sub init()
     m.logoBack = m.top.FindNode("logoBack")
     m.logoFront = m.top.FindNode("logoFront")
     m.preVideoPulse = m.top.FindNode("preVideoPulse")
+    m.overlay = m.top.FindNode("overlay")
+    m.overlay.video = m.video
+    m.overlay.ObserveField("action", "onOverlayAction")
+    m.overlayActive = false
+    m.episodeNav = invalid
+    m.metaTask = invalid
+    m.metaRetried = false
+    m.nextTask = invalid
+    m.nextStreams = invalid
+    m.nextWanted = false
     t = Theme()
     m.top.FindNode("playerBg").color = t.playerBg
     m.status.color = t.textPrimary
@@ -161,6 +172,7 @@ function OnEnter(params as object) as void
     m.playMode = playMode
     StartResolve(params.stream, params.serverAddress, ResolveOrdinal(params.season), ResolveOrdinal(params.episode))
     StartSubtitles(params)
+    PrepareOverlay(params)
 end function
 
 ' Kick stream resolution off the render thread. The task frees the UI while the
@@ -1185,7 +1197,9 @@ sub StartPlayback(url as string, streamFormat = "" as string, requestHeaders = i
     if m.video.HasField("enablePositionTracking") then m.video.enablePositionTracking = true
     ApplySubtitleIndex(content)
     m.video.content = content
-    m.video.SetFocus(true)
+    ' The Video runs with enableUI off; keys belong to the screen until the
+    ' overlay takes focus on the first "playing" (see onVideoStateChanged).
+    m.top.SetFocus(true)
 
     ' Play is asked for on the NEXT tick, not this one. Handing the node its
     ' content and its control in the same tick lets it act on `control` before it
@@ -1297,6 +1311,10 @@ sub onVideoStateChanged()
         m.hasPlayed = true
         m.status.text = ""
         HideBuffering()
+        if not m.overlayActive
+            m.overlayActive = true
+            m.overlay.callFunc("Activate", invalid)
+        end if
     else if state = "error" and m.hasPlayed = true and not NotPlayableOnDevice() and m.recoverCount < STALL_MAX_RECOVERIES()
         ' Mid-play failure of a stream that was already playing: almost always
         ' the connection to the host dropping. Reopen at the last good position
@@ -1337,6 +1355,10 @@ sub onVideoStateChanged()
         if HasLogo() then m.bufferingGroup.visible = true
     else if state = "paused"
         PublishWatchState()
+    else if state = "finished" and NextEpisode() <> invalid and not m.overlay.nextDismissed
+        ' Binge-watch: a real ending with a next episode rolls straight on.
+        HideBuffering()
+        PlayNextEpisode()
     else if state = "finished" or state = "stopped"
         HideBuffering()
     end if
@@ -1449,6 +1471,8 @@ function OnExit() as void
     CancelSubtitles()
     SavePosition()
     ResetVideoNode()
+    TearDownOverlay()
+    m.episodeNav = invalid
 end function
 
 ' Leave the node as the next play expects to find it: stopped, and carrying
@@ -1787,4 +1811,339 @@ sub onRecoverKick()
     m.lastSeenPos = -1
     m.video.control = "play"
     m.recovering = false
+end sub
+
+' ---------------------------------------------------------------------------
+' Player overlay: episode navigation, next episode and the episode drawer.
+'
+' The overlay (PlayerOverlay) owns the transport and the menus on its own; what
+' it cannot do alone is change WHAT is playing. It asks through `action`:
+'   next          — play the episode after this one
+'   episode       — play episode `index` of the drawer (this season)
+'   prefetchNext  — the end is near: fetch the next episode's streams now so
+'                   "Play now" / autoplay start without a wait
+' Switching is done in place: the finished play is saved and torn down exactly
+' as a Back would, and OnEnter runs again with the new episode's params. The
+' stream for the new episode comes from the SAME add-on the viewer picked, and
+' Stremio's behaviorHints.bingeGroup picks the matching release (same quality,
+' same debrid); without one the add-on's top result is used.
+' ---------------------------------------------------------------------------
+
+sub PrepareOverlay(params as object)
+    if m.overlay = invalid then return
+    ' The overlay has no store of its own, so its words travel from here
+    ' (OnEnter has just refreshed the table for the current language).
+    words = {}
+    for each key in ["nextEpisode", "playNow", "dismiss", "nextIn", "subtitles", "audio", "audioDefault", "speed", "speedValue", "episodes", "off", "captionsFallback"]
+        words[key] = Lang("player", key)
+    end for
+    m.overlay.strings = words
+    m.overlay.callFunc("ResetForPlay", invalid)
+    m.overlayActive = false
+    m.nextStreams = invalid
+    m.nextWanted = false
+    CancelNextTask()
+
+    title = ""
+    if params.name <> invalid then title = StringOf(params.name)
+    m.overlay.title = title
+    m.overlay.subtitle = ""
+
+    season = ResolveOrdinal(params.season)
+    episode = ResolveOrdinal(params.episode)
+    if StringOf(params.metaType) <> "series" or episode <= 0 or params.metaId = invalid or m.stores = invalid
+        m.episodeNav = invalid
+        m.overlay.nextInfo = {}
+        m.overlay.episodes = []
+        m.overlay.episodeIndex = -1
+        return
+    end if
+    m.overlay.subtitle = EpisodeMarker(season, episode)
+
+    ' Same series as the play that just ended: the list in hand is still right.
+    if m.episodeNav <> invalid and m.episodeNav.metaId = params.metaId
+        ApplyEpisodeNav()
+        return
+    end if
+    m.episodeNav = invalid
+    m.overlay.nextInfo = {}
+    m.overlay.episodes = []
+    meta = m.stores.episodes.callFunc("EpisodesFullMeta", "series", params.metaId)
+    if meta <> invalid and meta.videos <> invalid
+        BuildEpisodeNav(meta)
+        return
+    end if
+    CancelMetaTask()
+    m.metaRetried = false
+    address = ""
+    if params.metaAddonAddress <> invalid then address = StringOf(params.metaAddonAddress)
+    if address = "" then address = "https://v3-cinemeta.strem.io"
+    m.metaTask = AsyncTask_Launch(m.top, "MetaLoaderTask", "onPlayerMetaLoaded", {
+        addonAddress: address
+        metaType: "series"
+        metaId: StringOf(params.metaId)
+    }, "playerMetaLoader")
+end sub
+
+sub onPlayerMetaLoaded()
+    if m.metaTask = invalid then return
+    task = m.metaTask
+    m.metaTask = invalid
+    result = task.result
+    AsyncTask_Reap(task, m.top, false)
+    if result = invalid or result.ok <> true or result.meta = invalid
+        ' The catalog add-on may not serve metas; IMDb ids can always fall back
+        ' to Cinemeta, once.
+        if m.playParams <> invalid and not m.metaRetried
+            metaId = StringOf(m.playParams.metaId)
+            if Left(metaId, 2) = "tt"
+                m.metaRetried = true
+                m.metaTask = AsyncTask_Launch(m.top, "MetaLoaderTask", "onPlayerMetaLoaded", {
+                    addonAddress: "https://v3-cinemeta.strem.io"
+                    metaType: "series"
+                    metaId: metaId
+                }, "playerMetaLoader")
+            end if
+        end if
+        return
+    end if
+    if m.stores <> invalid then m.stores.episodes.callFunc("EpisodesCacheFullMeta", result.meta)
+    if m.playParams = invalid or result.meta.id <> m.playParams.metaId then return
+    BuildEpisodeNav(result.meta)
+end sub
+
+sub CancelMetaTask()
+    if m.metaTask <> invalid
+        task = m.metaTask
+        m.metaTask = invalid
+        AsyncTask_Reap(task, m.top, true)
+    end if
+end sub
+
+' Flatten the series into play order (regular seasons ascending, specials
+' skipped — the same order the Episodes screen and the watched bitfield use).
+sub BuildEpisodeNav(meta as object)
+    if m.playParams = invalid or m.stores = invalid then return
+    data = m.stores.episodes.callFunc("EpisodesSeriesData", m.playParams.metaId, meta)
+    if data = invalid or data.runs = invalid then return
+    ordered = []
+    for each seasonRun in data.runs
+        if seasonRun.season = invalid or seasonRun.season = 0 then continue for
+        for each ep in seasonRun.episodes
+            number = ep.episode
+            if number = invalid then number = ep.number
+            if number = invalid then continue for
+            name = ""
+            if ep.name <> invalid then name = StringOf(ep.name)
+            if name = "" and ep.title <> invalid then name = StringOf(ep.title)
+            ordered.Push({ season: seasonRun.season, episode: number, name: name })
+        end for
+    end for
+    m.episodeNav = { metaId: m.playParams.metaId, ordered: ordered }
+    ApplyEpisodeNav()
+end sub
+
+' Point the overlay at the current episode: the "next" target and this
+' season's drawer.
+sub ApplyEpisodeNav()
+    if m.episodeNav = invalid or m.playParams = invalid then return
+    season = ResolveOrdinal(m.playParams.season)
+    episode = ResolveOrdinal(m.playParams.episode)
+    ordered = m.episodeNav.ordered
+    current = -1
+    for i = 0 to ordered.Count() - 1
+        if ordered[i].season = season and ordered[i].episode = episode
+            current = i
+            exit for
+        end if
+    end for
+    m.episodeNav.current = current
+
+    if current >= 0 and ordered[current].name <> ""
+        m.overlay.subtitle = EpisodeMarker(season, episode) + "  ·  " + ordered[current].name
+    end if
+
+    drawer = []
+    drawerIndex = -1
+    m.episodeNav.drawer = []
+    for i = 0 to ordered.Count() - 1
+        e = ordered[i]
+        if e.season <> season then continue for
+        label = EpisodeMarker(e.season, e.episode)
+        if e.name <> "" then label = label + "  ·  " + e.name
+        if i = current then drawerIndex = drawer.Count()
+        drawer.Push({ label: label })
+        m.episodeNav.drawer.Push(i)
+    end for
+    m.overlay.episodes = drawer
+    m.overlay.episodeIndex = drawerIndex
+
+    nxt = NextEpisode()
+    if nxt <> invalid
+        label = EpisodeMarker(nxt.season, nxt.episode)
+        if nxt.name <> "" then label = label + "  ·  " + nxt.name
+        m.overlay.nextInfo = { label: label }
+    else
+        m.overlay.nextInfo = {}
+    end if
+end sub
+
+function NextEpisode() as dynamic
+    if m.episodeNav = invalid or m.episodeNav.current = invalid then return invalid
+    i = m.episodeNav.current
+    if i < 0 or i + 1 >= m.episodeNav.ordered.Count() then return invalid
+    if m.playParams = invalid or m.playParams.streamAddonAddress = invalid or m.playParams.streamAddonAddress = "" then return invalid
+    return m.episodeNav.ordered[i + 1]
+end function
+
+function EpisodeMarker(season as dynamic, episode as dynamic) as string
+    return Fill(Lang("common", "episodeMarker"), { season: StringOf(season), episode: StringOf(episode) })
+end function
+
+sub onOverlayAction()
+    action = m.overlay.action
+    if action = invalid or action.type = invalid then return
+    if action.type = "next"
+        PlayNextEpisode()
+    else if action.type = "prefetchNext"
+        nxt = NextEpisode()
+        if nxt <> invalid then FetchEpisodeStreams(nxt, false)
+    else if action.type = "episode"
+        if m.episodeNav = invalid or m.episodeNav.drawer = invalid then return
+        idx = action.index
+        if idx = invalid or idx < 0 or idx >= m.episodeNav.drawer.Count() then return
+        target = m.episodeNav.ordered[m.episodeNav.drawer[idx]]
+        m.nextStreams = invalid
+        FetchEpisodeStreams(target, true)
+    end if
+end sub
+
+sub PlayNextEpisode()
+    nxt = NextEpisode()
+    if nxt = invalid then return
+    if m.nextStreams <> invalid and m.nextStreams.season = nxt.season and m.nextStreams.episode = nxt.episode
+        SwitchToEpisode(nxt, m.nextStreams.streams)
+        return
+    end if
+    FetchEpisodeStreams(nxt, true)
+end sub
+
+' Ask the viewer's add-on for the target episode's streams. playWhenReady
+' switches as soon as they land; otherwise they are kept for later.
+sub FetchEpisodeStreams(target as object, playWhenReady as boolean)
+    if m.playParams = invalid or m.stores = invalid then return
+    address = m.playParams.streamAddonAddress
+    if address = invalid or address = "" then return
+    if m.nextTask <> invalid
+        ' Already fetching this one: just upgrade the intent.
+        if m.nextTarget <> invalid and m.nextTarget.season = target.season and m.nextTarget.episode = target.episode
+            if playWhenReady
+                m.nextWanted = true
+                Notify(Lang("player", "loadingNext"))
+            end if
+            return
+        end if
+        CancelNextTask()
+    end if
+    m.nextWanted = playWhenReady
+    if playWhenReady then Notify(Lang("player", "loadingNext"))
+    videoId = m.stores.episodes.callFunc("EpisodesResolveVideoId", m.playParams.metaId, target.season, target.episode)
+    m.nextTarget = target
+    m.nextTask = AsyncTask_Launch(m.top, "StreamsLoaderTask", "onEpisodeStreams", {
+        metaType: "series"
+        videoId: videoId
+        addonAddress: StringOf(address)
+        providerIndex: 0
+        providerName: ""
+    }, "playerNextStreams")
+end sub
+
+sub CancelNextTask()
+    if m.nextTask <> invalid
+        task = m.nextTask
+        m.nextTask = invalid
+        AsyncTask_Reap(task, m.top, true)
+    end if
+end sub
+
+sub onEpisodeStreams()
+    if m.nextTask = invalid then return
+    task = m.nextTask
+    m.nextTask = invalid
+    result = task.result
+    AsyncTask_Reap(task, m.top, false)
+    target = m.nextTarget
+    streams = []
+    if result <> invalid and result.streams <> invalid then streams = result.streams
+    if streams.Count() = 0
+        if m.nextWanted then Notify(Lang("player", "nextUnavailable"), "error")
+        m.nextWanted = false
+        return
+    end if
+    m.nextStreams = { season: target.season, episode: target.episode, streams: streams }
+    if m.nextWanted
+        m.nextWanted = false
+        SwitchToEpisode(target, streams)
+    end if
+end sub
+
+' The release to continue with: same bingeGroup as what is playing (Stremio's
+' rule for binge-watching), else the same stream label, else the top result.
+function PickEpisodeStream(streams as object) as dynamic
+    if streams = invalid or streams.Count() = 0 then return invalid
+    current = invalid
+    if m.playParams <> invalid then current = m.playParams.stream
+    group = ""
+    label = ""
+    if current <> invalid
+        if current.behaviorHints <> invalid and current.behaviorHints.bingeGroup <> invalid then group = StringOf(current.behaviorHints.bingeGroup)
+        if current.name <> invalid then label = StringOf(current.name)
+    end if
+    if group <> ""
+        for each s in streams
+            if s.behaviorHints <> invalid and s.behaviorHints.bingeGroup <> invalid and StringOf(s.behaviorHints.bingeGroup) = group then return s
+        end for
+    end if
+    if label <> ""
+        for each s in streams
+            if s.name <> invalid and StringOf(s.name) = label then return s
+        end for
+    end if
+    return streams[0]
+end function
+
+sub SwitchToEpisode(target as object, streams as object)
+    stream = PickEpisodeStream(streams)
+    if stream = invalid or m.playParams = invalid or m.stores = invalid then return
+    old = m.playParams
+    params = {}
+    for each key in old
+        params[key] = old[key]
+    end for
+    params.stream = stream
+    params.season = target.season
+    params.episode = target.episode
+    params.videoId = m.stores.episodes.callFunc("EpisodesResolveVideoId", old.metaId, target.season, target.episode)
+    params.position = 0
+    saved = m.stores.library.callFunc("LibraryResumeFor", old.metaId)
+    if saved <> invalid and saved.videoId = params.videoId and saved.position <> invalid and saved.position > 0 then params.position = saved.position
+
+    ' Leave the finished episode exactly as Back would (save, stop, blank),
+    ' then enter the new one.
+    m.overlay.callFunc("Deactivate", invalid)
+    CancelResolve()
+    CancelSubtitles()
+    SavePosition()
+    ResetVideoNode()
+    m.nextStreams = invalid
+    OnEnter(params)
+end sub
+
+sub TearDownOverlay()
+    CancelMetaTask()
+    CancelNextTask()
+    m.nextStreams = invalid
+    m.nextWanted = false
+    m.overlayActive = false
+    if m.overlay <> invalid then m.overlay.callFunc("Deactivate", invalid)
 end sub

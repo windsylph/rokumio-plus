@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="PlayerOverlay" extends="Group">
+    <!-- Stremio-style player chrome drawn over the Video node (which runs with
+         enableUI off). Owns the transport the viewer touches — play/pause,
+         10s skips, scrubbing, the subtitle / audio / speed / episode menus and
+         the "Next episode" pop-up — and talks to the Video node it is handed
+         directly. Anything that needs the rest of the app (switching to
+         another episode) leaves through `action` for PlayerScreen to carry out.
+
+         Remote map, controls hidden: OK/Play = pause/resume, Left/Right and
+         Replay = -/+10s, Rew/FF = -/+30s, Up/Down = show controls, * = subtitles.
+         Controls shown: Up/Down move between the seek bar and the buttons,
+         Left/Right scrub (seek bar) or move between buttons, OK activates.
+         Back closes an open menu; otherwise it falls through and leaves. -->
+    <interface>
+        <field id="video" type="node" />
+        <field id="title" type="string" onChange="onTitleChanged" />
+        <field id="subtitle" type="string" onChange="onTitleChanged" />
+        <!-- { label, title } of the next episode, or invalid when there is none. -->
+        <field id="nextInfo" type="assocarray" onChange="onNextInfoChanged" />
+        <!-- [{ label, videoId, season, episode }] for the episode drawer. -->
+        <field id="episodes" type="array" onChange="onEpisodesChanged" />
+        <field id="episodeIndex" type="integer" value="-1" />
+        <field id="nextDismissed" type="boolean" value="false" />
+        <!-- The overlay's words, resolved by PlayerScreen (which owns the
+             texts store): { nextEpisode, playNow, dismiss, nextIn, subtitles,
+             audio, audioDefault, speed, speedValue, episodes, off,
+             captionsFallback }. -->
+        <field id="strings" type="assocarray" onChange="onStringsChanged" />
+        <field id="action" type="assocarray" alwaysNotify="true" />
+        <function name="Activate" />
+        <function name="Deactivate" />
+        <function name="ResetForPlay" />
+    </interface>
+
+    <script type="text/brightscript" uri="pkg:/components/PlayerOverlay.brs" />
+    <script type="text/brightscript" uri="pkg:/source/core/Theme.bs" />
+    <script type="text/brightscript" uri="pkg:/source/util/Helpers.brs" />
+
+    <children>
+        <Group id="chrome" visible="false" opacity="1.0">
+            <Poster id="topFade" uri="pkg:/images/player/fade_top.png" width="1920" height="260" translation="[0, 0]" />
+            <Poster id="bottomFade" uri="pkg:/images/player/fade_bottom.png" width="1920" height="420" translation="[0, 660]" />
+
+            <Label id="titleLabel" translation="[96, 56]" width="1500" height="56" font="font:LargeBoldSystemFont" />
+            <Label id="subtitleLabel" translation="[96, 116]" width="1500" height="40" font="font:SmallSystemFont" />
+
+            <!-- Seek row -->
+            <Group id="seekRow" translation="[96, 880]">
+                <Rectangle id="seekTrack" width="1728" height="6" translation="[0, -3]" />
+                <Rectangle id="seekBuffered" width="0" height="6" translation="[0, -3]" />
+                <Rectangle id="seekFill" width="0" height="6" translation="[0, -3]" />
+                <Poster id="seekKnob" uri="pkg:/images/player/knob.png" width="28" height="28" translation="[-14, -14]" visible="false" />
+                <Label id="scrubLabel" width="200" height="40" translation="[-100, -64]" horizAlign="center" font="font:MediumBoldSystemFont" visible="false" />
+                <Label id="elapsedLabel" width="300" height="40" translation="[0, 18]" font="font:SmallSystemFont" />
+                <Label id="durationLabel" width="300" height="40" translation="[1428, 18]" horizAlign="right" font="font:SmallSystemFont" />
+            </Group>
+
+            <!-- Button row: transport on the left, menus on the right. Each
+                 button is { ring, icon }; the ring shows on focus. -->
+            <Group id="buttonRow" translation="[96, 948]" />
+        </Group>
+
+        <!-- Up-next card -->
+        <Group id="nextPopup" visible="false" translation="[1264, 600]">
+            <Rectangle id="nextBg" width="560" height="232" />
+            <Label id="nextHeading" translation="[32, 24]" width="496" height="36" font="font:SmallBoldSystemFont" />
+            <Label id="nextTitle" translation="[32, 64]" width="496" height="44" font="font:MediumBoldSystemFont" />
+            <Label id="nextCountdown" translation="[32, 108]" width="496" height="32" font="font:SmallestSystemFont" />
+            <Rectangle id="nextPlayBg" translation="[32, 156]" width="236" height="52" />
+            <Label id="nextPlayLabel" translation="[32, 156]" width="236" height="52" horizAlign="center" vertAlign="center" font="font:SmallBoldSystemFont" />
+            <Rectangle id="nextDismissBg" translation="[292, 156]" width="236" height="52" />
+            <Label id="nextDismissLabel" translation="[292, 156]" width="236" height="52" horizAlign="center" vertAlign="center" font="font:SmallBoldSystemFont" />
+        </Group>
+
+        <!-- Side drawer menu (subtitles / audio / speed / episodes) -->
+        <Group id="menu" visible="false" translation="[1320, 0]">
+            <Rectangle id="menuBg" width="600" height="1080" />
+            <Label id="menuTitle" translation="[48, 64]" width="504" height="52" font="font:MediumBoldSystemFont" />
+            <!-- Rows are built in init and painted by PaintMenu; the overlay keeps
+                 focus the whole time and drives the list from its own onKeyEvent,
+                 so a menu can never strand the remote. -->
+            <Group id="menuRows" translation="[48, 140]" />
+        </Group>
+
+        <Timer id="hideTimer" duration="4" repeat="false" />
+        <Timer id="scrubTimer" duration="0.7" repeat="false" />
+        <!-- Progressive scrubbing: ticks while a seek key is held. -->
+        <Timer id="holdTimer" duration="0.25" repeat="true" />
+    </children>
+</component>

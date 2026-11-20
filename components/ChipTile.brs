@@ -91,9 +91,9 @@ sub ApplyState()
     focused = (m.top.focused = true) or (m.top.itemHasFocus = true)
     rowLit = focused or (m.top.rowFocused = true) or (m.top.rowHasFocus = true)
     if focused
-        m.iconBg.blendColor = t.textPrimary
-        m.icon.blendColor = t.screenBg
-        m.text.color = t.screenBg
+        m.iconBg.blendColor = t.accent
+        m.icon.blendColor = t.onAccent
+        m.text.color = t.onAccent
     else if m.active
         m.iconBg.blendColor = t.chipActiveBg
         m.icon.blendColor = t.chipActiveText
@@ -102,12 +102,13 @@ sub ApplyState()
         if m.top.flat = true
             m.iconBg.blendColor = "0x00000000"
         else
-            m.iconBg.blendColor = t.tileFace
+            ' Stremio's idle pill: rgba(255,255,255,0.05) over the backdrop.
+            m.iconBg.blendColor = "0xFFFFFF14"
         end if
         m.icon.blendColor = t.textSecondary
         m.text.color = t.textPrimary
     end if
-    if rowLit then m.top.opacity = 1.0 else m.top.opacity = 0.55
+    if rowLit then m.top.opacity = 1.0 else m.top.opacity = 0.8
 end sub
 
 sub onStateChanged()

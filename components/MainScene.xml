@@ -72,6 +72,8 @@
             <!-- Everything inside uiRoot is authored in 1920x1080 design space.
                  Screens are children of uiRoot; the stack shows one at a time. -->
             <Rectangle id="background" width="1920" height="1080" />
+            <!-- Stremio's backdrop: linear-gradient(41deg, #0C0B11, #1A173E). -->
+            <Poster id="backgroundGradient" width="1920" height="1080" loadDisplayMode="scaleToFill" uri="pkg:/images/ui/bg_gradient.png" />
 
             <HomeScreen id="homeScreen" visible="false" />
             <AuthScreen id="authScreen" visible="false" />
@@ -85,6 +87,7 @@
             <SearchScreen id="searchScreen" visible="false" />
             <DiscoverScreen id="discoverScreen" visible="false" />
             <LibraryScreen id="libraryScreen" visible="false" />
+            <CalendarScreen id="calendarScreen" visible="false" />
             <PlayerScreen id="playerScreen" visible="false" />
         </Group>
 

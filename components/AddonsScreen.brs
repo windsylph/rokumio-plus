@@ -14,7 +14,7 @@ sub init()
     m.addChipRow = m.top.FindNode("addChipRow")
 
     t = Theme()
-    m.bg.color = "0x000000FF"
+    m.bg.color = "0x00000000"
     m.title.color = t.textPrimary
     m.status.color = t.accent
     if m.setupHeader <> invalid

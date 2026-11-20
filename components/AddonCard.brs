@@ -94,16 +94,17 @@ sub UpdateLook()
     rowFocused = m.top.rowHasFocus = true
 
     if focused
-        m.border.blendColor = t.textWhite
-        m.face.blendColor = t.tileFaceFocus
+        m.border.blendColor = "0xFFFFFFE6"
+        m.face.blendColor = "0x221F38FF"
         m.name.color = t.textPrimary
         m.version.color = t.textSecondary
         m.scope.color = t.textSecondary
         m.description.color = t.textPrimary
         m.action.color = t.textPrimary
     else
-        m.border.blendColor = t.borderSoft
-        m.face.blendColor = t.tileFace
+        ' Stremio add-on card: rgba(255,255,255,0.05), no border.
+        m.border.blendColor = "0x00000000"
+        m.face.blendColor = "0xFFFFFF0D"
         m.name.color = t.textPrimary
         m.version.color = t.textSecondary
         m.scope.color = t.textSecondary
@@ -121,7 +122,7 @@ sub UpdateLook()
     end if
     m.logo.blendColor = "0xFFFFFFFF"
 
-    if rowFocused then m.top.opacity = 1.0 else m.top.opacity = 0.55
+    m.top.opacity = 1.0
 end sub
 
 function RokuLogoUri(uri as dynamic) as string

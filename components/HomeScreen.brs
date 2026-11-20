@@ -35,6 +35,13 @@ sub init()
     m.railBrandCollapseAnim = m.top.FindNode("railBrandCollapseAnim")
     m.railBg = m.top.FindNode("railBg")
     m.hero = m.top.FindNode("hero")
+    ' Stremio's board has no hero: rows start under the top bar.
+    m.hero.visible = false
+    m.searchPill = m.top.FindNode("searchPill")
+    m.searchPillFace = m.top.FindNode("searchPillFace")
+    m.searchPillText = m.top.FindNode("searchPillText")
+    m.searchPillRing = m.top.FindNode("searchPillRing")
+    m.searchFocused = false
     m.heroMetaDelay = m.top.FindNode("heroMetaDelay")
     m.heroMetaDelay.ObserveField("fire", "onHeroMetaDelayFire")
     m.heroPrefetchDelay = m.top.FindNode("heroPrefetchDelay")
@@ -51,7 +58,8 @@ sub init()
 
     t = Theme()
     m.homeEmpty.color = t.textSecondary
-    m.railBg.color = t.navBg
+    m.railBg.color = "0x00000000"
+    m.searchPillText.color = t.textPrimary
     m.catalog.rowLabelOffset = [0,10]
     m.catalog.focusBitmapBlendColor = t.accentFocus
 
@@ -377,6 +385,9 @@ end function
 
 sub RenderHomeHero(meta as object)
     if meta = invalid then return
+    ' The Stremio board hides the hero; rendering it anyway would still pull a
+    ' 1120x630 backdrop into texture memory on every focus move.
+    if m.hero = invalid or not m.hero.visible then return
     enriched = {}
     for each key in meta
         enriched[key] = meta[key]
@@ -890,6 +901,7 @@ end function
 function OnEnter(params as object) as void
     ' Pull the current language before rebuilding the rail or grid labels.
     RefreshTexts()
+    if m.searchFocused then SetSearchFocus(false)
     if not m.railBuilt or m.railLanguage <> TextsLanguage()
         BuildRail()
         m.railLanguage = TextsLanguage()
@@ -958,14 +970,16 @@ end sub
 ' stack screen.
 sub BuildRail()
     entries = [
-        { glyph: "pkg:/images/search.png", name: Lang("home", "railSearch"), screen: "searchScreen" }
+        { glyph: "pkg:/images/home.png", name: Lang("home", "railBoard"), screen: "homeScreen", board: true }
         { glyph: "pkg:/images/discover.png", name: Lang("home", "railDiscover"), screen: "discoverScreen" }
         { glyph: "pkg:/images/library.png", name: Lang("home", "railLibrary"), screen: "libraryScreen" }
+        { glyph: "pkg:/images/calendar.png", name: Lang("home", "railCalendar"), screen: "calendarScreen" }
         { glyph: "pkg:/images/puzzle.png", name: Lang("home", "railAddons"), screen: "addonsScreen" }
         { glyph: "pkg:/images/settings.png", name: Lang("home", "railSettings"), screen: "settingsScreen" }
         { glyph: "pkg:/images/support.png", name: Lang("home", "railSupport"), screen: "supportDialog", dialog: true }
     ]
     m.railEntries = entries
+    m.searchPillText.text = Lang("home", "searchPlaceholder")
     m.railFocusIndex = -1
     if m.railRememberedIndex >= entries.Count() then m.railRememberedIndex = 0
     while m.rail.GetChildCount() > 0
@@ -975,10 +989,25 @@ sub BuildRail()
         entry = entries[i]
         tile = m.rail.CreateChild("RailTile")
         tile.focusable = true
-        tile.translation = [0, i * 120]
+        ' Stremio nav pitch: 96px buttons with a 14px gap (rail starts at y=150).
+        tile.translation = [0, i * 110]
         tile.callFunc("SetTile", entry.glyph, entry.name)
+        ' Board is the screen this rail lives on, so it reads as selected.
+        tile.selected = entry.board = true
     end for
     m.railBuilt = true
+end sub
+
+' Stremio's top-bar search: "Search or paste link". Focus lights the pill.
+sub SetSearchFocus(focused as boolean)
+    m.searchFocused = focused
+    m.searchPillRing.visible = focused
+    if focused
+        m.searchPillFace.blendColor = "0xFFFFFF33"
+        m.searchPill.SetFocus(true)
+    else
+        m.searchPillFace.blendColor = "0xFFFFFF14"
+    end if
 end sub
 
 sub FocusRail()
@@ -1010,20 +1039,8 @@ sub CollapseRail()
 end sub
 
 sub SetRailExpanded(expanded as boolean)
-    for i = 0 to m.rail.GetChildCount() - 1
-        m.rail.GetChild(i).expanded = expanded
-    end for
-    if expanded
-        m.railBg.color = Theme().navBgExpanded
-        m.railBrandCollapseAnim.control = "stop"
-        m.railBrandExpandAnim.control = "stop"
-        m.railBrandExpandAnim.control = "start"
-    else
-        m.railBg.color = Theme().navBg
-        m.railBrandExpandAnim.control = "stop"
-        m.railBrandCollapseAnim.control = "stop"
-        m.railBrandCollapseAnim.control = "start"
-    end if
+    ' Stremio's nav bar never widens: the focused button shows its own label
+    ' (RailTile), so there is nothing to expand. Kept as the rail's hook.
 end sub
 
 sub MoveRailFocus(delta as integer)
@@ -1044,6 +1061,12 @@ end sub
 sub SelectRailEntry()
     if m.railFocusIndex < 0 or m.railEntries = invalid or m.railFocusIndex >= m.railEntries.Count() then return
     entry = m.railEntries[m.railFocusIndex]
+    if entry.board = true
+        ' Board: already here.
+        CollapseRail()
+        m.catalog.SetFocus(true)
+        return
+    end if
     request = {
         screen: entry.screen
         params: {}
@@ -1065,6 +1088,28 @@ function onKeyEvent(key as string, press as boolean) as boolean
         scene = m.top.getScene()
         if scene <> invalid then scene.callFunc("Notify", Lang("home", "refreshing"), "info")
         RebuildRows()
+        return true
+    end if
+
+    if m.searchFocused
+        if key = "OK"
+            ' Drop the pill's focus state first: coming back from Search the
+            ' stack refocuses the grid, and a stale flag would steal its keys.
+            SetSearchFocus(false)
+            m.top.pushRequest = { screen: "searchScreen", params: {} }
+        else if key = "down"
+            SetSearchFocus(false)
+            m.catalog.SetFocus(true)
+        else if key = "left"
+            SetSearchFocus(false)
+            FocusRail()
+        end if
+        return true
+    end if
+
+    if key = "up" and m.catalog.HasFocus() and m.railFocusIndex < 0
+        ' The RowList lets Up bubble only from its first row: the top bar.
+        SetSearchFocus(true)
         return true
     end if
 

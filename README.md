@@ -1,5 +1,35 @@
 <div align="center">
 
+# Rokumio+
+
+### A Stremio-styled fork of [Rokumio](https://github.com/gpratoe/rokumio-client) — the native Roku client for Stremio addons.
+
+</div>
+
+## What Rokumio+ adds
+
+- **Stremio look and feel** — Stremio's palette and backdrop gradient, the top
+  "Search or paste link" bar, an icon-only vertical nav (Board, Discover,
+  Library, Calendar, Add-ons, Settings), rounded posters with a white focus ring
+  and titles under them, pill-shaped filters, and a Stremio-style preview card
+  on Discover and Calendar.
+- **Stremio-style player** — a bottom control bar (play/pause, ±10 s, next
+  episode, episodes, subtitles, audio, speed), a "Next episode" card with
+  autoplay that keeps the same release (`bingeGroup`), and an in-player episode
+  drawer.
+- **Progressive scrubbing** — hold ◀/▶ (or ⏪/⏩): taps move 10 s (30 s), holding
+  accelerates through 10 s → 30 s → 60 s → 2–5 min steps with a »/»»/»»» speed
+  indicator, and seeks once on release.
+- **Calendar** — new and upcoming episodes of the series in your Library.
+- **Fixes** — add-on URLs with a port (e.g. a self-hosted
+  `http://192.168.1.20:7000/manifest.json`) no longer fail as "invalid".
+
+Everything below is the upstream Rokumio README.
+
+---
+
+<div align="center">
+
 # Rokumio
 
 ### A native Roku 10-foot client for Stremio addons.

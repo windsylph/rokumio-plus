@@ -52,7 +52,7 @@ sub init()
     palette = Theme()
     m.title.color = palette.textPrimary
     m.status.color = palette.accent
-    m.infoPlate.color = palette.tileFace
+    m.infoPlate.blendColor = "0xFFFFFF0D"
     m.infoTitle.color = palette.textPrimary
     m.infoWarn.color = palette.danger
     m.infoBody.color = palette.textSecondary

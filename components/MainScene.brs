@@ -75,6 +75,8 @@ sub init()
     m.discoverScreen.ObserveField("pushRequest", "onDiscoverAction")
     m.libraryScreen = m.top.FindNode("libraryScreen")
     m.libraryScreen.ObserveField("pushRequest", "onLibraryAction")
+    m.calendarScreen = m.top.FindNode("calendarScreen")
+    m.calendarScreen.ObserveField("pushRequest", "onCalendarAction")
     m.uiRoot = m.top.FindNode("uiRoot")
     m.toast = m.top.FindNode("toast")
     m.libraryWriteCoordinator = m.top.FindNode("libraryWriteCoordinator")
@@ -167,6 +169,7 @@ sub init()
     m.searchScreen.callFunc("SetStores", m.storeHost, m.top)
     m.discoverScreen.callFunc("SetStores", m.storeHost, m.top)
     m.libraryScreen.callFunc("SetStores", m.storeHost, m.top)
+    m.calendarScreen.callFunc("SetStores", m.storeHost, m.top)
     m.playerScreen.callFunc("SetStores", m.storeHost, m.top)
 
     homeHero = m.homeScreen.FindNode("hero")
@@ -175,6 +178,8 @@ sub init()
     if discoverHero <> invalid then discoverHero.callFunc("SetStores", m.storeHost, m.top)
     libraryHero = m.libraryScreen.FindNode("hero")
     if libraryHero <> invalid then libraryHero.callFunc("SetStores", m.storeHost, m.top)
+    calendarHero = m.calendarScreen.FindNode("hero")
+    if calendarHero <> invalid then calendarHero.callFunc("SetStores", m.storeHost, m.top)
 end sub
 
 sub Notify(text as string, kind = "info" as string)
@@ -224,6 +229,12 @@ sub onDiscoverAction()
 end sub
 
 ' LibraryScreen's action channel; same one-action routing.
+sub onCalendarAction()
+    request = m.calendarScreen.pushRequest
+    if request = invalid or request.screen = invalid then return
+    m.stack.push(request.screen, request.params)
+end sub
+
 sub onLibraryAction()
     request = m.libraryScreen.pushRequest
     if request = invalid or request.screen = invalid then return

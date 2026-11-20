@@ -16,6 +16,7 @@ sub init()
     m.heroLogoLoader = m.top.FindNode("heroLogoLoader")
     m.stores = invalid
     m.textsLanguage = ""
+    m.heroPanel = false
 
     if m.heroPosterLoader <> invalid then m.heroPosterLoader.target = m.heroPoster
     if m.heroLogoLoader <> invalid then m.heroLogoLoader.target = m.heroLogo
@@ -76,6 +77,36 @@ sub RefreshHeroTexts()
     if m._texts <> invalid and m.textsLanguage = currentLang then return
     LoadTexts(m.stores.texts)
     m.textsLanguage = TextsLanguage()
+end sub
+
+' Stremio MetaPreview card: art on top, then logo/title, facts, genres and
+' description inside a rounded card at the right edge.
+sub ApplyPanelMode()
+    m.heroPanel = m.top.panel = true
+    card = m.top.FindNode("heroCard")
+    fadeLR = m.top.FindNode("heroFadeLR")
+    fadeBT = m.top.FindNode("heroFadeBT")
+    if not m.heroPanel
+        if card <> invalid then card.visible = false
+        return
+    end if
+    if card <> invalid then card.visible = true
+    for each node in [m.heroPoster, m.heroPosterPrev]
+        node.translation = [1296, 60]
+        node.width = 564
+        node.height = 318
+    end for
+    if fadeLR <> invalid then fadeLR.visible = false
+    if fadeBT <> invalid
+        fadeBT.translation = [1296, 238]
+        fadeBT.width = 564
+        fadeBT.height = 140
+    end if
+    if m.heroScrim <> invalid then m.heroScrim.visible = false
+    m.heroTitle.translation = [1328, 330]
+    m.heroTitle.width = 500
+    m.heroTitle.height = 100
+    HeroPanelPlace()
 end sub
 
 sub ApplyHeroTheme()

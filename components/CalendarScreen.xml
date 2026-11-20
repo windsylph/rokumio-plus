@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="CalendarScreen" extends="Screen">
+    <!-- Calendar (Stremio's Calendar route, adapted to a TV grid): episodes of
+         the series saved in the Library that came out in the last week or come
+         out in the next month, one row per day. The hero reflects the focused
+         episode; OK opens the series' Details. The schedule is fetched off the
+         UI thread by CalendarTask (one meta per saved series). -->
+    <interface>
+        <field id="pushRequest" type="assocarray" alwaysNotify="true" />
+        <function name="OnEnter" />
+        <function name="OnExit" />
+        <function name="OnBackPressed" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/components/CalendarScreen.brs" />
+    <script type="text/brightscript" uri="pkg:/source/util/Helpers.brs" />
+    <script type="text/brightscript" uri="pkg:/source/core/Theme.bs" />
+    <script type="text/brightscript" uri="pkg:/source/core/AsyncTask.bs" />
+    <children>
+        <Rectangle id="calendarBg" width="1920" height="1080" color="0x00000000" />
+        <BrowseHero id="hero" panel="true" posterLoadWidth="564" posterLoadHeight="318" />
+        <Label
+            id="calendarHeading"
+            translation="[90, 56]"
+            width="1740"
+            height="52"
+            font="font:MediumBoldSystemFont" />
+        <RowList
+            id="calendarGrid"
+            translation="[90, 140]"
+            numRows="2"
+            itemSize="[1170, 460]"
+            itemSpacing="[0, 100]"
+            rowItemSize="[[270, 405]]"
+            rowItemSpacing="[[18, 0]]"
+            showRowLabel="[true]"
+            rowLabelOffset="[[0, 12]]"
+            rowLabelFont="font:SmallBoldSystemFont"
+            drawFocusFeedback="false"
+            itemComponentName="PosterTile" />
+        <Label
+            id="calendarStatus"
+            translation="[90, 480]"
+            width="1160"
+            height="90"
+            horizAlign="center"
+            vertAlign="center"
+            wrap="true"
+            font="font:MediumSystemFont" />
+    </children>
+</component>
