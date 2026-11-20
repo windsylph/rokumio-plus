@@ -24,6 +24,47 @@
 - **Fixes** — add-on URLs with a port (e.g. a self-hosted
   `http://192.168.1.20:7000/manifest.json`) no longer fail as "invalid".
 
+## Try it on your Mac (no Roku needed)
+
+Rokumio+ runs in [brs-engine](https://github.com/lvcabral/brs-engine), an
+open-source Roku simulator, so you can click through it on a laptop. Needs
+Node.js 20+ and Python 3 (both come with most Macs' developer tools).
+
+```bash
+npm install
+npm run sim
+```
+
+That builds the channel, starts a local server and opens
+`http://localhost:6502` in your browser. Click the page once, then use the
+keyboard as the remote:
+
+| Remote | Keyboard |
+|---|---|
+| D-pad | Arrow keys |
+| OK | Enter |
+| Back | Esc (or Delete) |
+| Play/Pause | End |
+| Rewind / Fast-forward | PageUp / PageDown (Cmd+← / Cmd+→) |
+| Replay | Backspace |
+| \* (options) | Insert (or Ctrl+8) |
+| Text in keyboard dialogs | type letters and digits |
+
+Stop it with Ctrl+C in the terminal. After changing code, stop and run
+`npm run sim` again (it rebuilds).
+
+**Trying playback:** run `npm run sim:video` once (macOS: converts a built-in
+wallpaper video to `tools/simulator/web/test.mp4`), then in the app go to
+Add-ons → Add add-on and enter `http://localhost:6502/addon/manifest.json`.
+Every movie and episode then has two "Local Test" streams that play that clip —
+enough to try the player, the menus and progressive scrubbing.
+
+**Simulator limits:** it is a simulator, not the TV. Expect small rendering
+differences; video frames may not paint behind the controls; and playback stops
+after ~30 s because the simulator rejects a long-standing Rokumio call (the
+periodic watch-progress save) that works on a real Roku. Real streams through
+your Torrentio/TorBox add-ons and Stremio account sign-in behave as on the TV.
+
 Everything below is the upstream Rokumio README.
 
 ---

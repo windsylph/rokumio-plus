@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Rokumio+ simulator</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; object-fit: contain; }
+</style>
+</head>
+<body>
+<!-- Rokumio+ in the brs-engine Roku simulator (npm run sim). Click the page
+     once so it has keyboard focus; the key map is printed in the terminal. -->
+<canvas id="display" width="1920" height="1080"></canvas>
+<video id="player" style="display: none" crossorigin="anonymous"></video>
+<script src="lib/brs.api.js"></script>
+<script>
+async function boot() {
+  await brs.initialize({
+    displayMode: "1080p",
+    corsProxy: location.origin + "/proxy/",
+    extensions: new Map([[brs.SupportedExtension.SceneGraph, "./brs-sg.js"]]),
+  }, { debugToConsole: true });
+  // The engine fetches its fonts/sounds bundle on init; give it a moment so
+  // the app never starts without them.
+  await new Promise(r => setTimeout(r, 2500));
+  const app = await fetch("app.zip?" + Date.now());
+  brs.execute("app.zip", await app.arrayBuffer(), { clearDisplayOnExit: false });
+}
+window.addEventListener("load", boot);
+// Save the current screen to tools/simulator/web/shots/<name>.png
+window.shot = async (name) => {
+  const blob = await brs.getDisplayBuffer().convertToBlob({ type: "image/png" });
+  return (await fetch("/save/" + (name || Date.now()) + ".png", { method: "POST", body: blob })).status;
+};
+</script>
+</body>
+</html>
