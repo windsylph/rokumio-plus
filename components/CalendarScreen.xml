@@ -37,6 +37,7 @@
             rowLabelOffset="[[0, 12]]"
             rowLabelFont="font:SmallBoldSystemFont"
             drawFocusFeedback="false"
+            rowFocusAnimationStyle="floatingFocus"
             itemComponentName="PosterTile" />
         <Label
             id="calendarStatus"

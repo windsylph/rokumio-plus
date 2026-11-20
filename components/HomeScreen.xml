@@ -56,6 +56,7 @@
             showRowLabel="[true]"
             rowLabelFont="font:MediumBoldSystemFont"
             drawFocusFeedback="false"
+            rowFocusAnimationStyle="floatingFocus"
             itemComponentName="PosterTile" />
         <!-- Left rail: the vertical icon menu (Search, Discover, Library,
              Add-ons, Settings, Support). Collapsed to icons; focusing it

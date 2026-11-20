@@ -51,6 +51,7 @@
             rowItemSpacing="[[18, 0]]"
             showRowLabel="false"
             drawFocusFeedback="false"
+            rowFocusAnimationStyle="floatingFocus"
             itemComponentName="PosterTile" />
 
         <!-- Filter chips + dropdown (FilterBar), Discover-style long chips.

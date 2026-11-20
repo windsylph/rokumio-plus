@@ -302,10 +302,15 @@ end sub
 ' supplied by RowList as [rowIndex, itemIndex]; all display data is already in
 ' the same meta the tile uses.
 sub onCatalogItemFocused()
+    ' The Stremio board has no hero, so a focus move has nothing to update:
+    ' skipping the hero bookkeeping (meta merges across the StoreHost boundary,
+    ' prefetch timers) keeps every arrow press cheap.
+    if not m.hero.visible then return
     UpdateHomeHero(m.catalog.rowItemFocused)
 end sub
 
 sub RefreshHomeHeroFromFocus()
+    if not m.hero.visible then return
     data = m.catalog.rowItemFocused
     if data <> invalid then UpdateHomeHero(data)
 end sub

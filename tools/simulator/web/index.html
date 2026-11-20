@@ -10,7 +10,8 @@
 </head>
 <body>
 <!-- Rokumio+ in the brs-engine Roku simulator (npm run sim). Click the page
-     once so it has keyboard focus; the key map is printed in the terminal. -->
+     once so it has keyboard focus; the key map is printed in the terminal.
+     Add ?stats to the URL for the engine's FPS / memory overlay. -->
 <canvas id="display" width="1920" height="1080"></canvas>
 <video id="player" style="display: none" crossorigin="anonymous"></video>
 <script src="lib/brs.api.js"></script>
@@ -20,14 +21,28 @@ async function boot() {
     displayMode: "1080p",
     corsProxy: location.origin + "/proxy/",
     extensions: new Map([[brs.SupportedExtension.SceneGraph, "./brs-sg.js"]]),
-  }, { debugToConsole: true });
-  // The engine fetches its fonts/sounds bundle on init; give it a moment so
-  // the app never starts without them.
-  await new Promise(r => setTimeout(r, 2500));
+  }, { debugToConsole: true, showStats: location.search.includes("stats") });
+  // The engine fetches its fonts/sounds bundle on init and the app must not
+  // start before it lands: wait for that same (browser-cached) file instead of
+  // a fixed delay, plus a short margin for the engine to unpack it.
+  await fetch("assets/common.zip?v=" + brs.getVersion?.() ).catch(() => {});
+  await new Promise(r => setTimeout(r, 400));
   const app = await fetch("app.zip?" + Date.now());
   brs.execute("app.zip", await app.arrayBuffer(), { clearDisplayOnExit: false });
 }
 window.addEventListener("load", boot);
+// ?timing: logs how long Home takes to finish drawing (no screen change for 4 s).
+if (location.search.includes("timing")) {
+  window.loadTiming = (async () => {
+    const t0 = performance.now(); const c = new OffscreenCanvas(96, 54); const x = c.getContext("2d");
+    const sig = () => { const b = brs.getDisplayBuffer(); if (!b) return 0; x.drawImage(b, 0, 0, 96, 54); const d = x.getImageData(0, 0, 96, 54).data; let h = 0; for (let i = 0; i < d.length; i += 7) h = (h * 31 + d[i]) | 0; return h; };
+    let prev = 0, last = t0;
+    while (performance.now() - last < 4000 && performance.now() - t0 < 120000) {
+      await new Promise(r => setTimeout(r, 100)); const s = sig(); if (s !== prev) { prev = s; last = performance.now(); }
+    }
+    return Math.round((last - t0) / 100) / 10;
+  })();
+}
 // Save the current screen to tools/simulator/web/shots/<name>.png
 window.shot = async (name) => {
   const blob = await brs.getDisplayBuffer().convertToBlob({ type: "image/png" });

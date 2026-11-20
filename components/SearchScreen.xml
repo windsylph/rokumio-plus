@@ -124,6 +124,7 @@
             rowLabelOffset="[[0, 32]]"
             rowLabelFont="font:MediumBoldSystemFont"
             drawFocusFeedback="false"
+            rowFocusAnimationStyle="floatingFocus"
             itemComponentName="PosterTile" />
 
         <!-- Empty state: the quiet "type something" line, centered in the

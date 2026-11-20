@@ -42,6 +42,7 @@
             rowItemSpacing="[[18, 0]]"
             showRowLabel="false"
             drawFocusFeedback="false"
+            rowFocusAnimationStyle="floatingFocus"
             itemComponentName="PosterTile" />
 
         <FilterBar id="filterBar" translation="[90, 62]" chipItemWidth="300" chipItemHeight="60" menuItemHeight="56" />
