@@ -33,6 +33,7 @@ sub init()
         m.posterLoader.ObserveField("status", "onPosterStateChanged")
     end if
 
+    m.poster.ObserveField("loadStatus", "onPosterStateChanged")
     m.top.ObserveField("itemContent", "onItemContentChanged")
     m.top.ObserveField("itemHasFocus", "onItemHasFocusChanged")
     m.top.ObserveField("rowHasFocus", "onRowHasFocusChanged")
@@ -115,7 +116,10 @@ sub ApplyPosterPresentation()
         return
     end if
     if StringOf(m.posterLoader.uri) <> uri then return
-    if m.posterLoader.ready = true or StringOf(m.posterLoader.status) = "ready"
+    ' A thumbnail that has painted wins over whatever the loader still reports
+    ' (see PosterTile): the placeholder title must never sit on a real image.
+    posterOnScreen = m.poster.loadStatus = "ready" and StringOf(m.poster.uri) <> ""
+    if m.posterLoader.ready = true or StringOf(m.posterLoader.status) = "ready" or posterOnScreen
         ShowPoster()
     else
         ShowArtless()

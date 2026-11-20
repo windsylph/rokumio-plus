@@ -32,6 +32,7 @@ sub init()
     m.epSkeleton = m.top.FindNode("epSkeleton")
     m.epSkeleton.layout = { kind: "cards", x: 80, y: 560, rows: 2, tileW: 1760, tileH: 300, gapY: 12, thumbW: 448 }
     m.epStatus.ObserveField("text", "UpdateEpisodesSkeleton")
+    m.epStatus.ObserveField("visible", "UpdateEpisodesSkeleton")
     m.epList = m.top.FindNode("epList")
 
     t = Theme()
@@ -384,6 +385,7 @@ sub RenderSeason(rowIndex as integer)
     if m.seasonContents[rowIndex] = invalid then BuildSeasonPage(rowIndex)
 
     m.epStatus.visible = false
+    UpdateEpisodesSkeleton()
     m.epList.content = m.seasonContents[rowIndex]
     m.epList.numRows = m.seasonEpisodes[rowIndex].Count()
     ' A fresh build lands focus on the resume spot; a season flip starts at the
@@ -784,7 +786,9 @@ sub RestoreFocus()
 end sub
 
 sub UpdateEpisodesSkeleton()
-    loading = m.epStatus.text = Lang("episodes", "loading")
+    ' Loading = the status line says so, is showing, and no card is painted.
+    loading = m.epStatus.text = Lang("episodes", "loading") and m.epStatus.visible
+    if m.epList.content <> invalid and m.epList.content.GetChildCount() > 0 then loading = false
     m.epSkeleton.active = loading
     if loading then m.epStatus.opacity = 0 else m.epStatus.opacity = 1
 end sub

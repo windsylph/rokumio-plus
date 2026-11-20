@@ -643,7 +643,11 @@ sub UpdateHomeEmptyState()
     if m.homeEmpty = invalid then return
     m.homeEmpty.text = Lang("home", "emptyCatalogRows")
     m.homeEmpty.visible = m.catalogRowsBuilt and m.gridRows.Count() = 0
-    if m.homeSkeleton <> invalid then m.homeSkeleton.active = m.gridRows.Count() = 0 and not m.catalogRowsBuilt
+    if m.homeSkeleton <> invalid
+        shownRows = 0
+        if m.catalog.content <> invalid then shownRows = m.catalog.content.GetChildCount()
+        m.homeSkeleton.active = shownRows = 0 and m.gridRows.Count() = 0 and not m.catalogRowsBuilt
+    end if
 end sub
 
 ' Rebuild the grid from the current add-on set — called by the Scene after a

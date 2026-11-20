@@ -50,6 +50,9 @@ sub init()
         m.posterLoader.ObserveField("status", "onPosterStateChanged")
     end if
 
+    ' The artwork's own load status is the ground truth for the ghost: it fires
+    ' on every real transition, whichever path (loader, cache, retry) filled it.
+    m.poster.ObserveField("loadStatus", "onPosterLoadStatus")
     m.top.ObserveField("itemContent", "onItemContentChanged")
     m.top.ObserveField("itemHasFocus", "onItemHasFocusChanged")
     m.top.ObserveField("rowHasFocus", "onRowHasFocusChanged")
@@ -128,8 +131,9 @@ end sub
 sub onItemContentChanged()
     if m.top.itemContent = invalid then return
     m.caption.text = StringOf(m.top.itemContent.title)
-    m.caption.visible = m.top.itemContent.seeMore <> true
     if m.top.itemContent.seeMore = true
+        ' An action tile, never a loading one: no ghost, no caption.
+        SetGhost(false)
         m.requestedPosterUri = ""
         if m.posterLoader <> invalid then m.posterLoader.uri = ""
         m.artless.visible = false
@@ -178,13 +182,18 @@ sub onItemContentChanged()
     else
         if forceReload or prevUri <> requestPoster
             m.requestedPosterUri = requestPoster
+            ' Ghost first, then load, then read the loader's real state: an
+            ' artwork the engine already holds reports "ready" during Load
+            ' itself, and marking the tile as loading afterwards would leave it
+            ' stuck as a ghost over a finished poster.
+            ShowArtless()
+            SetGhost(true)
             if m.posterLoader <> invalid
                 ' Force a fresh request even for same URI on explicit reload.
                 m.posterLoader.callFunc("Clear")
                 m.posterLoader.callFunc("Load", requestPoster)
             end if
-            ShowArtless()
-            SetGhost(true)
+            ApplyPosterPresentation()
         else
             ' Same requested URI: keep presentation based on current loader state.
             m.requestedPosterUri = requestPoster
@@ -206,7 +215,11 @@ sub ApplyPosterPresentation()
     end if
     ' Ignore stale loader updates from a previous request.
     if StringOf(m.posterLoader.uri) <> m.requestedPosterUri then return
-    if m.posterLoader.ready = true or StringOf(m.posterLoader.status) = "ready"
+    ' The artwork node itself is the authority on what is on screen: the
+    ' loader can still report "loading" (retry bookkeeping) after the bitmap
+    ' has painted, and that must never put a ghost back over a real poster.
+    posterOnScreen = m.poster.loadStatus = "ready" and StringOf(m.poster.uri) <> ""
+    if m.posterLoader.ready = true or StringOf(m.posterLoader.status) = "ready" or posterOnScreen
         ShowPoster()
         SetGhost(false)
     else
@@ -221,7 +234,8 @@ end sub
 ' and a caption bar instead of a dark slab with text. Static on purpose — a
 ' grid can hold hundreds of tiles, and the screens pulse their own skeletons.
 sub SetGhost(on as boolean)
-    if m.ghost = on then return
+    ' Applied in full every time (no "already in that state" shortcut): a
+    ' recycled tile must never keep the previous title's ghost or caption.
     m.ghost = on
     if on
         m.tileBg.color = "0xFFFFFF12"
@@ -233,6 +247,18 @@ sub SetGhost(on as boolean)
     end if
     m.captionGhost.visible = on
     m.caption.visible = not on and m.top.itemContent <> invalid and m.top.itemContent.seeMore <> true
+end sub
+
+sub onPosterLoadStatus()
+    if m.requestedPosterUri = "" then return
+    status = m.poster.loadStatus
+    if status = "ready"
+        ' Artwork is on screen: never a ghost over it.
+        SetGhost(false)
+    else if status = "failed"
+        ' The loader may still retry; until then the title names the tile.
+        SetGhost(false)
+    end if
 end sub
 
 sub ShowArtless()

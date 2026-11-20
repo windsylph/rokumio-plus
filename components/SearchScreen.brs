@@ -163,7 +163,8 @@ sub SetSearchStatus(text as string, searching = false as dynamic)
         m.searchSkeleton = m.top.FindNode("searchSkeleton")
         m.searchSkeleton.layout = { kind: "rows", x: 750, y: 136, rows: 2, cols: 4, tileW: 270, tileH: 405, gapX: 18, gapY: 20, captions: true }
     end if
-    m.searchSkeleton.active = searching
+    hasRows = m.rows <> invalid and m.rows.Count() > 0
+    m.searchSkeleton.active = searching and not hasRows
     if text = ""
         m.status.text = ""
         m.status.visible = false

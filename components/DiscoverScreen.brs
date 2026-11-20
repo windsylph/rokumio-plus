@@ -107,6 +107,7 @@ end function
 sub UpdateDiscoverSkeleton()
     loading = m.status.text = Lang("discover", "loading")
     empty = m.metas = invalid or m.metas.Count() = 0
+    if m.grid.content <> invalid and m.grid.content.GetChildCount() > 0 then empty = false
     m.skeleton.active = loading and empty
     if loading and empty then m.status.opacity = 0 else m.status.opacity = 1
 end sub
