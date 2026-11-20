@@ -110,7 +110,9 @@
             "statusInvalidAddress": "Invalid address.",
             "statusServerCleared": "Server address cleared.",
             "statusServerUpdated": "Server address updated.",
-            "saveFailed": "Could not save settings on this device. Changes may be lost after restart."
+            "saveFailed": "Could not save settings on this device. Changes may be lost after restart.",
+            "rowShowSupport": "Show Support in menu",
+            "panelShowSupport": "Adds a Support button to the side menu, linking to the original Rokumio developer's donation page."
         },
         "main": {
             "logOutTitle": "Log out?",
@@ -487,7 +489,9 @@
             "statusInvalidAddress": "Dirección no válida.",
             "statusServerCleared": "Dirección del servidor borrada.",
             "statusServerUpdated": "Dirección del servidor actualizada.",
-            "saveFailed": "No se pudo guardar la configuración en este dispositivo. Los cambios pueden perderse al reiniciar."
+            "saveFailed": "No se pudo guardar la configuración en este dispositivo. Los cambios pueden perderse al reiniciar.",
+            "rowShowSupport": "Mostrar Apoyo en el menú",
+            "panelShowSupport": "Añade un botón de Apoyo al menú lateral, con la página de donaciones del desarrollador original de Rokumio."
         },
         "main": {
             "logOutTitle": "¿Cerrar sesión?",

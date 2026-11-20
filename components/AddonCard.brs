@@ -62,8 +62,22 @@ sub ApplyContent()
     rawLogo = ""
     if content.addonLogo <> invalid then rawLogo = StringOf(content.addonLogo).Trim()
     m.isPlaceholder = IsPlaceholderLogo(rawLogo)
-    m.logo.uri = RokuLogoUri(rawLogo)
+    uri = RokuLogoUri(rawLogo)
+    if StringOf(m.logo.uri) <> uri
+        ResetLogoBox()
+        m.logo.uri = uri
+    end if
+    ' A recycled card can be handed the image it already holds: no reload, so
+    ' no "ready" event — fit from the bitmap that is already there.
+    if m.logo.loadStatus = "ready" then FitImageToBox(m.logo, 52, 88, 144, 144, "center", "center")
     UpdateLook()
+end sub
+
+' The icon's box (144x144 at [52, 88]); a fresh load starts from it.
+sub ResetLogoBox()
+    m.logo.width = 144
+    m.logo.height = 144
+    m.logo.translation = [52, 88]
 end sub
 
 sub onLogoLoadStatus()
@@ -71,8 +85,11 @@ sub onLogoLoadStatus()
     if m.logo <> invalid then status = m.logo.loadStatus
     if status = "failed"
         m.isPlaceholder = true
+        ResetLogoBox()
         UpdateLook()
     else if status = "ready"
+        ' Keep the add-on's own proportions inside the square, centered.
+        FitImageToBox(m.logo, 52, 88, 144, 144, "center", "center")
         content = m.top.itemContent
         if content <> invalid
             rawLogo = ""

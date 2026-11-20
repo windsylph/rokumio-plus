@@ -110,6 +110,8 @@
              results. numRows is set from m.rows; nothing is premised, so the
              list can start empty and fill in as add-ons answer. The row label
              offset gives the title breathing room above its posters. -->
+        <!-- Ghost result rows while a search runs. -->
+        <SkeletonView id="searchSkeleton" />
         <RowList
             id="searchResults"
             translation="[750, 136]"

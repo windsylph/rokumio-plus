@@ -253,7 +253,7 @@ end sub
 ' in one language and painted in another cannot disagree with itself.
 function SectionDefinitions() as object
     sections = []
-    sections.Push({ id: "general", rows: ["account", "language"] })
+    sections.Push({ id: "general", rows: ["account", "language", "showSupport"] })
     sections.Push({ id: "home", rows: ["homeRows"] })
     server = ["server", "audioPassthrough", "audioTransmux", "directPlay", "torrentProfile", "cacheSize", "testServer"]
     ' The two diagnostic rows are appended last and only once the gesture has
@@ -288,6 +288,8 @@ function RowLabel(action as string) as string
         return Lang("settings", "rowHomeRows")
     else if action = "server" then
         return Lang("settings", "rowServer")
+    else if action = "showSupport" then
+        return Lang("settings", "rowShowSupport")
     else if action = "audioPassthrough" then
         return Lang("settings", "rowAudioPassthrough")
     else if action = "audioTransmux" then
@@ -326,6 +328,8 @@ function RowValue(action as string) as string
         return Lang("settings", "valueHomeRows")
     else if action = "server" then
         return ServerValue()
+    else if action = "showSupport" then
+        return ShowSupportValue()
     else if action = "audioPassthrough" then
         return AudioPassthroughValue()
     else if action = "audioTransmux" then
@@ -594,6 +598,8 @@ function PanelBody(action as string) as string
         return Lang("settings", "panelServer")
     else if action = "language" then
         return Lang("settings", "panelLanguage")
+    else if action = "showSupport" then
+        return Lang("settings", "panelShowSupport")
     else if action = "homeRows" then
         return Lang("settings", "panelHomeRows")
     else if action = "testServer" then
@@ -667,6 +673,22 @@ end function
 ' and its answer does not change because a setting was flipped — asking again
 ' put the panel back to "asking the device" for a moment and rebuilt the list
 ' a second time, which is what threw the cursor to the first row.
+function ShowSupportValue() as string
+    if m.stores = invalid then return Lang("common", "off")
+    if m.stores.settings.callFunc("SettingsGetShowSupport") then return Lang("common", "on")
+    return Lang("common", "off")
+end function
+
+sub ToggleShowSupport()
+    if m.stores = invalid then return
+    current = m.stores.settings.callFunc("SettingsGetShowSupport")
+    if m.stores.settings.callFunc("SettingsSetShowSupport", not current)
+        ReportSaveFault()
+        RefreshValues()
+        UpdatePanel()
+    end if
+end sub
+
 sub ToggleAudioPassthrough()
     if m.stores = invalid then return
     current = m.stores.settings.callFunc("SettingsGetAudioPassthrough")
@@ -979,6 +1001,8 @@ sub ActivateRow(index as integer)
         EditServer()
     else if action = "language"
         CycleLanguage()
+    else if action = "showSupport"
+        ToggleShowSupport()
     else if action = "audioPassthrough"
         ToggleAudioPassthrough()
     else if action = "audioTransmux"

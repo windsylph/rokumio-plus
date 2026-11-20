@@ -54,6 +54,9 @@ sub init()
     m.heroMetaTaskKey = ""
     m.heroFocusKey = ""
     m.homeEmpty = m.top.FindNode("homeEmpty")
+    m.homeSkeleton = m.top.FindNode("homeSkeleton")
+    m.homeSkeleton.layout = { kind: "rows", x: 150, y: 150, rows: 2, cols: 7, tileW: 270, tileH: 405, gapX: 18, gapY: 20, captions: true }
+    m.homeSkeleton.active = true
     m.heroBeforeBusy = ""
 
     t = Theme()
@@ -80,6 +83,7 @@ sub init()
     m.railLanguage = ""
     m.railFocusIndex = -1
     m.railRememberedIndex = 0
+    m.railSupport = false
 end sub
 
 ' Kick off the catalog walk. The walking happens off the UI thread in a
@@ -634,6 +638,7 @@ sub UpdateHomeEmptyState()
     if m.homeEmpty = invalid then return
     m.homeEmpty.text = Lang("home", "emptyCatalogRows")
     m.homeEmpty.visible = m.catalogRowsBuilt and m.gridRows.Count() = 0
+    if m.homeSkeleton <> invalid then m.homeSkeleton.active = m.gridRows.Count() = 0 and not m.catalogRowsBuilt
 end sub
 
 ' Rebuild the grid from the current add-on set — called by the Scene after a
@@ -902,7 +907,7 @@ function OnEnter(params as object) as void
     ' Pull the current language before rebuilding the rail or grid labels.
     RefreshTexts()
     if m.searchFocused then SetSearchFocus(false)
-    if not m.railBuilt or m.railLanguage <> TextsLanguage()
+    if not m.railBuilt or m.railLanguage <> TextsLanguage() or m.railSupport <> ShowSupportEnabled()
         BuildRail()
         m.railLanguage = TextsLanguage()
     end if
@@ -976,8 +981,11 @@ sub BuildRail()
         { glyph: "pkg:/images/calendar.png", name: Lang("home", "railCalendar"), screen: "calendarScreen" }
         { glyph: "pkg:/images/puzzle.png", name: Lang("home", "railAddons"), screen: "addonsScreen" }
         { glyph: "pkg:/images/settings.png", name: Lang("home", "railSettings"), screen: "settingsScreen" }
-        { glyph: "pkg:/images/support.png", name: Lang("home", "railSupport"), screen: "supportDialog", dialog: true }
     ]
+    if ShowSupportEnabled()
+        entries.Push({ glyph: "pkg:/images/support.png", name: Lang("home", "railSupport"), screen: "supportDialog", dialog: true })
+    end if
+    m.railSupport = ShowSupportEnabled()
     m.railEntries = entries
     m.searchPillText.text = Lang("home", "searchPlaceholder")
     m.railFocusIndex = -1
@@ -1009,6 +1017,11 @@ sub SetSearchFocus(focused as boolean)
         m.searchPillFace.blendColor = "0xFFFFFF14"
     end if
 end sub
+
+function ShowSupportEnabled() as boolean
+    if m.stores = invalid then return false
+    return m.stores.settings.callFunc("SettingsGetShowSupport") = true
+end function
 
 sub FocusRail()
     if m.railFocusIndex < 0 then m.railFocusIndex = m.railRememberedIndex

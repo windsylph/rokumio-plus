@@ -16,6 +16,7 @@ class ScreenStack
     sub new(scene as object)
         m.scene = scene
         m.entries = []
+        m.fadingNode = invalid
     end sub
 
     function count() as integer
@@ -79,9 +80,28 @@ class ScreenStack
 
         m.entries.Push({ id: screenId, node: node, destroy: destroy })
         node.visible = true
+        m.fadeIn(node)
         node.screenActive = true
         node.SetFocus(true)
         node.callFunc("OnEnter", params)
+    end sub
+
+    ' A short fade-in for the screen coming to the front (MainScene's
+    ' screenFade animation). Visual only: focus and OnEnter are untouched, and a
+    ' fade that is interrupted by the next push leaves its screen fully opaque.
+    ' Absent (tests, or a scene without the animation) it is a no-op.
+    sub fadeIn(node as object)
+        if m.scene = invalid or node = invalid then return
+        fade = m.scene.FindNode("screenFade")
+        interp = m.scene.FindNode("screenFadeInterp")
+        if fade = invalid or interp = invalid then return
+        if node.id = invalid or node.id = "" then return
+        fade.control = "stop"
+        if m.fadingNode <> invalid then m.fadingNode.opacity = 1.0
+        node.opacity = 0.0
+        interp.fieldToInterp = node.id + ".opacity"
+        m.fadingNode = node
+        fade.control = "start"
     end sub
 
     function pop() as boolean
@@ -102,6 +122,7 @@ class ScreenStack
         shown = m.top()
         if shown <> invalid
             shown.node.visible = true
+            m.fadeIn(shown.node)
             shown.node.screenActive = true
             shown.node.SetFocus(true)
             shown.node.callFunc("OnEnter", invalid)

@@ -73,6 +73,9 @@
                  Screens are children of uiRoot; the stack shows one at a time. -->
             <Rectangle id="background" width="1920" height="1080" />
             <!-- Stremio's backdrop: linear-gradient(41deg, #0C0B11, #1A173E). -->
+            <Animation id="screenFade" duration="0.18" repeat="false" easeFunction="outQuad">
+                <FloatFieldInterpolator id="screenFadeInterp" key="[0.0, 1.0]" keyValue="[0.0, 1.0]" />
+            </Animation>
             <Poster id="backgroundGradient" width="1920" height="1080" loadDisplayMode="scaleToFill" uri="pkg:/images/ui/bg_gradient.png" />
 
             <HomeScreen id="homeScreen" visible="false" />

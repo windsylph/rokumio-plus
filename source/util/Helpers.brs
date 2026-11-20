@@ -209,6 +209,35 @@ end function
 ' Each key replaces every occurrence (a loop, since BrightScript has no
 ' replace-all), and untouched tokens are left visible in the text, which the
 ' parity linter then reads as an unfinished translation.
+'  Size and place an image node inside a box at the image's own aspect ratio:
+' as large as the box allows, never past its edges, never stretched. Reads the
+' loaded bitmap's real size, so call it once loadStatus is "ready" (and load
+' with loadDisplayMode "limitSize", which keeps the shape while capping memory).
+' hAlign: "left" | "center" | "right"; vAlign: "top" | "center" | "bottom".
+' Returns false (node untouched) when the bitmap size is not known yet.
+function FitImageToBox(node as dynamic, boxX as integer, boxY as integer, boxW as integer, boxH as integer, hAlign = "center" as string, vAlign = "center" as string) as boolean
+    if node = invalid or boxW <= 0 or boxH <= 0 then return false
+    bw = node.bitmapWidth
+    bh = node.bitmapHeight
+    if bw = invalid or bh = invalid or bw <= 0 or bh <= 0 then return false
+    scale = boxW / bw
+    if bh * scale > boxH then scale = boxH / bh
+    w = Int(bw * scale + 0.5)
+    h = Int(bh * scale + 0.5)
+    if w > boxW then w = boxW
+    if h > boxH then h = boxH
+    x = boxX
+    if hAlign = "center" then x = boxX + Int((boxW - w) / 2)
+    if hAlign = "right" then x = boxX + boxW - w
+    y = boxY
+    if vAlign = "center" then y = boxY + Int((boxH - h) / 2)
+    if vAlign = "bottom" then y = boxY + boxH - h
+    node.width = w
+    node.height = h
+    node.translation = [x, y]
+    return true
+end function
+
 function Fill(template as string, values as object) as string
     text = template
     if values <> invalid

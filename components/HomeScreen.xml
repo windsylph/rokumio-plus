@@ -43,6 +43,8 @@
         <!-- Poster rows: a single RowList owns the whole grid physics (vertical
              row scrolling/clipping, horizontal per-row tiles, row labels). Each
              item renders as a PosterTile component. Content is set in code. -->
+        <!-- Ghost rows until the first catalog row arrives. -->
+        <SkeletonView id="homeSkeleton" />
         <RowList
             id="catalog"
             translation="[150, 150]"

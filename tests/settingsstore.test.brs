@@ -99,6 +99,17 @@ sub Test_Settings_PersistsViaRegistry()
     Harness_Equal(reopened.GetLanguage(), "es", "language reloaded")
 end sub
 
+sub Test_Settings_ShowSupportDefaultsOffAndPersists()
+    Harness_Suite("SettingsStore keeps the Support menu entry off by default and persists the toggle")
+    registry = MockRegistry()
+    settings = SettingsStore(registry)
+    Harness_Equal(settings.GetShowSupport(), false, "off by default")
+    settings.SetShowSupport(true)
+    Harness_Equal(SettingsStore(registry).GetShowSupport(), true, "on survives a reopen")
+    settings.SetShowSupport(false)
+    Harness_Equal(SettingsStore(registry).GetShowSupport(), false, "off survives a reopen")
+end sub
+
 sub Test_Settings_InMemoryOnlyWithoutRegistry()
     Harness_Suite("SettingsStore without a registry is in-memory only")
     settings = SettingsStore(invalid)

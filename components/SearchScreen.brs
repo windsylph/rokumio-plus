@@ -159,6 +159,11 @@ end sub
 ' animation is stopped when hidden so it never runs invisibly.
 sub SetSearchStatus(text as string, searching = false as dynamic)
     if searching <> true then searching = false
+    if m.searchSkeleton = invalid
+        m.searchSkeleton = m.top.FindNode("searchSkeleton")
+        m.searchSkeleton.layout = { kind: "rows", x: 750, y: 136, rows: 2, cols: 4, tileW: 270, tileH: 405, gapX: 18, gapY: 20, captions: true }
+    end if
+    m.searchSkeleton.active = searching
     if text = ""
         m.status.text = ""
         m.status.visible = false

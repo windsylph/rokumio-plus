@@ -18,6 +18,12 @@
 
 sub init()
     m.status = m.top.FindNode("discoverStatus")
+    m.skeleton = m.top.FindNode("discoverSkeleton")
+    m.skeleton.layout = { kind: "grid", x: 90, y: 150, rows: 2, cols: 4, tileW: 270, tileH: 405, gapX: 18, gapY: 46, captions: true, panel: { x: 1296, y: 60, w: 564, h: 980 } }
+    ' The status line already says when a catalog is loading; the ghost
+    ' follows it, so every path that loads (first load, filter change, retry)
+    ' shows the skeleton without each one having to say so.
+    m.status.ObserveField("text", "UpdateDiscoverSkeleton")
     m.filterBar = m.top.FindNode("filterBar")
     m.grid = m.top.FindNode("discoverGrid")
 
@@ -97,6 +103,13 @@ function OnEnter(params as object) as void
     ClearDiscoverHero()
     EnsureSources()
 end function
+
+sub UpdateDiscoverSkeleton()
+    loading = m.status.text = Lang("discover", "loading")
+    empty = m.metas = invalid or m.metas.Count() = 0
+    m.skeleton.active = loading and empty
+    if loading and empty then m.status.opacity = 0 else m.status.opacity = 1
+end sub
 
 function OnExit() as void
     if m.discoverRetryTimer <> invalid then m.discoverRetryTimer.control = "stop"

@@ -430,6 +430,16 @@ function SettingsClearServerAddress() as void
     m.stores.settings.ClearServerAddress()
 end function
 
+' settings.GetShowSupport
+function SettingsGetShowSupport() as boolean
+    return m.stores.settings.GetShowSupport()
+end function
+
+' settings.SetShowSupport
+function SettingsSetShowSupport(value as boolean) as boolean
+    return m.stores.settings.SetShowSupport(value)
+end function
+
 ' settings.GetAudioPassthrough
 function SettingsGetAudioPassthrough() as boolean
     return m.stores.settings.GetAudioPassthrough()

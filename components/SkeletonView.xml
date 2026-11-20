@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="SkeletonView" extends="Group">
+    <!-- Ghost loading state (Stremio-style placeholders) drawn in the shape of
+         the content that is on its way: poster rows with titles, a poster grid,
+         or a stack of cards, plus an optional preview-card ghost. One pulse
+         animation drives the whole group, so it costs the same whether it
+         shows four shapes or forty.
+
+         layout: {
+           kind:    "rows" | "grid" | "cards" | "bars"
+           bars:    [{ x, y, w, h }]   (kind "bars": free-placed text lines)
+           x, y:    top-left of the content area
+           rows, cols
+           tileW, tileH, gapX, gapY   (poster / card size and spacing)
+           captions: true             (bars under posters)
+           panel:   { x, y, w, h }    (optional preview card ghost)
+         }
+         active: shows the ghost and runs the pulse; false hides and stops it. -->
+    <interface>
+        <field id="layout" type="assocarray" onChange="onLayoutChanged" />
+        <field id="active" type="boolean" value="false" onChange="onActiveChanged" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/components/SkeletonView.brs" />
+    <children>
+        <Group id="shapes" />
+        <Animation id="pulse" duration="1.6" repeat="true" easeFunction="inOutQuad">
+            <FloatFieldInterpolator
+                id="pulseInterp"
+                fieldToInterp="shapes.opacity"
+                key="[0.0, 0.5, 1.0]"
+                keyValue="[0.45, 1.0, 0.45]" />
+        </Animation>
+    </children>
+</component>

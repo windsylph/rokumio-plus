@@ -24,6 +24,7 @@
             width="1740"
             height="52"
             font="font:MediumBoldSystemFont" />
+        <SkeletonView id="calendarSkeleton" />
         <RowList
             id="calendarGrid"
             translation="[90, 140]"

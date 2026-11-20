@@ -48,9 +48,9 @@
             translation="[162, 48]"
             width="820"
             height="460"
-            loadWidth="560"
-            loadHeight="360"
-            loadDisplayMode="scaleToFit"
+            loadWidth="820"
+            loadHeight="460"
+            loadDisplayMode="limitSize"
             visible="false" />
         <Label
             id="detailName"
@@ -75,6 +75,9 @@
             width="860"
             height="32"
             font="font:SmallerSystemFont" />
+        <!-- Ghost lines for the rating / genres / synopsis while the full meta
+             is still being fetched. -->
+        <SkeletonView id="detailsSkeleton" />
         <Label
             id="detailDesc"
             translation="[166, 333]"

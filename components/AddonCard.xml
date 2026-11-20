@@ -30,7 +30,7 @@
                 height="144"
                 loadWidth="144"
                 loadHeight="144"
-                loadDisplayMode="scaleToFit"
+                loadDisplayMode="limitSize"
                 uri="pkg:/images/puzzle.png"
                 failedBitmapUri="pkg:/images/puzzle.png" />
 

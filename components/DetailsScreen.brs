@@ -21,6 +21,14 @@ sub init()
     m.bgPosterLoader = m.top.FindNode("bgPosterLoader")
     m.bgFullLoader = m.top.FindNode("bgFullLoader")
     m.logoLoader = m.top.FindNode("logoLoader")
+    m.detailsSkeleton = m.top.FindNode("detailsSkeleton")
+    m.detailsSkeleton.layout = { kind: "bars", bars: [
+        { x: 166, y: 236, w: 150, h: 30 }
+        { x: 166, y: 287, w: 320, h: 22 }
+        { x: 166, y: 340, w: 700, h: 22 }
+        { x: 166, y: 376, w: 660, h: 22 }
+        { x: 166, y: 412, w: 520, h: 22 }
+    ] }
     m.bgPosterLoader.target = m.bgPoster
     m.bgFullLoader.target = m.bgPosterFull
     m.logoLoader.target = m.heroLogo
@@ -328,6 +336,8 @@ sub MaybeRefreshMeta()
         metaId: m.meta.id
     }, "detailsMetaLoader")
     m.loadTask = task
+    ' Ghost the synopsis block only when there is nothing real to show there.
+    m.detailsSkeleton.active = StringOf(m.meta.description).Trim() = ""
 end sub
 
 ' Tear down an in-flight meta refresh. A newer entry supersedes it, and leaving
@@ -335,6 +345,7 @@ end sub
 ' Task node does not kill its worker thread — and dropping the observer means
 ' its result can never land.
 sub CancelMetaLoad()
+    if m.detailsSkeleton <> invalid then m.detailsSkeleton.active = false
     if m.loadTask <> invalid
         task = m.loadTask
         m.loadTask = invalid
@@ -352,6 +363,7 @@ sub onMetaLoaded()
     m.loadTask = invalid
     result = task.result
     AsyncTask_Reap(task, m.top, false)
+    m.detailsSkeleton.active = false
 
     if result = invalid or not result.ok or result.meta = invalid then return
     if result.meta.id <> invalid and m.meta <> invalid and result.meta.id <> m.meta.id then return

@@ -29,6 +29,9 @@ sub init()
     m.seasonLeft = m.top.FindNode("seasonLeft")
     m.seasonRight = m.top.FindNode("seasonRight")
     m.epStatus = m.top.FindNode("epStatus")
+    m.epSkeleton = m.top.FindNode("epSkeleton")
+    m.epSkeleton.layout = { kind: "cards", x: 80, y: 560, rows: 2, tileW: 1760, tileH: 300, gapY: 12, thumbW: 448 }
+    m.epStatus.ObserveField("text", "UpdateEpisodesSkeleton")
     m.epList = m.top.FindNode("epList")
 
     t = Theme()
@@ -778,6 +781,12 @@ sub RestoreFocus()
     if m.activeRow < 0 or m.activeRow >= m.seasons.Count() then return
     if m.seasonEpisodes[m.activeRow].Count() = 0 then return
     if m.top.screenActive then m.epList.SetFocus(true)
+end sub
+
+sub UpdateEpisodesSkeleton()
+    loading = m.epStatus.text = Lang("episodes", "loading")
+    m.epSkeleton.active = loading
+    if loading then m.epStatus.opacity = 0 else m.epStatus.opacity = 1
 end sub
 
 function OnExit() as void

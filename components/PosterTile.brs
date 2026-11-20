@@ -26,6 +26,8 @@ sub init()
     m.corners = m.top.FindNode("corners")
     m.focusRing = m.top.FindNode("focusRing")
     m.caption = m.top.FindNode("caption")
+    m.captionGhost = m.top.FindNode("captionGhost")
+    m.ghost = false
 
     t = Theme()
     m.tileBg.color = t.tileFace
@@ -85,6 +87,8 @@ sub ApplyTileSize()
     m.focusRing.height = h
     m.caption.width = w
     m.caption.translation = [0, h + 9]
+    m.captionGhost.width = Int(w * 0.6)
+    m.captionGhost.translation = [Int(w * 0.2), h + 15]
     m.watchedBadge.translation = [w - 62, 8]
     if m.seeMoreGroup <> invalid
         m.seeMoreBg.width = w
@@ -147,6 +151,7 @@ sub onItemContentChanged()
         if m.posterLoader <> invalid then m.posterLoader.uri = ""
         m.titleText.text = m.top.itemContent.title
         ShowArtless()
+        SetGhost(true)
         UpdateOverlays()
         UpdateLook()
         return
@@ -169,6 +174,7 @@ sub onItemContentChanged()
         m.requestedPosterUri = ""
         if m.posterLoader <> invalid then m.posterLoader.uri = ""
         ShowArtless()
+        SetGhost(false)
     else
         if forceReload or prevUri <> requestPoster
             m.requestedPosterUri = requestPoster
@@ -178,6 +184,7 @@ sub onItemContentChanged()
                 m.posterLoader.callFunc("Load", requestPoster)
             end if
             ShowArtless()
+            SetGhost(true)
         else
             ' Same requested URI: keep presentation based on current loader state.
             m.requestedPosterUri = requestPoster
@@ -201,10 +208,31 @@ sub ApplyPosterPresentation()
     if StringOf(m.posterLoader.uri) <> m.requestedPosterUri then return
     if m.posterLoader.ready = true or StringOf(m.posterLoader.status) = "ready"
         ShowPoster()
+        SetGhost(false)
     else
         ' loading/failed (including retries exhausted) keeps artless/title visible.
         ShowArtless()
+        ' Still on its way: a ghost. Given up: the title, which names the tile.
+        SetGhost(StringOf(m.posterLoader.status) <> "failed")
     end if
+end sub
+
+' Ghost (skeleton) look for a tile whose artwork has not arrived: a soft face
+' and a caption bar instead of a dark slab with text. Static on purpose — a
+' grid can hold hundreds of tiles, and the screens pulse their own skeletons.
+sub SetGhost(on as boolean)
+    if m.ghost = on then return
+    m.ghost = on
+    if on
+        m.tileBg.color = "0xFFFFFF12"
+        ' Faded, not hidden: the artless Group owns visibility as one unit.
+        m.titleText.opacity = 0
+    else
+        m.tileBg.color = Theme().tileFace
+        m.titleText.opacity = 1
+    end if
+    m.captionGhost.visible = on
+    m.caption.visible = not on and m.top.itemContent <> invalid and m.top.itemContent.seeMore <> true
 end sub
 
 sub ShowArtless()

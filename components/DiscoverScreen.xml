@@ -31,6 +31,7 @@
             height="34"
             font="font:SmallSystemFont" />
 
+        <SkeletonView id="discoverSkeleton" />
         <RowList
             id="discoverGrid"
             translation="[90, 150]"

@@ -84,6 +84,10 @@ sub init()
     m.importCoordinator = m.top.FindNode("importCoordinator")
     m.accountSyncCoordinator = m.top.FindNode("accountSyncCoordinator")
     m.top.FindNode("background").color = Theme().screenBg
+    ' Safety net for ScreenStack's fade-in: whatever happens to the animation,
+    ' the screen it targeted ends fully opaque once it stops.
+    m.screenFade = m.top.FindNode("screenFade")
+    if m.screenFade <> invalid then m.screenFade.ObserveField("state", "onScreenFadeState")
 
     ' Settings can start the link-code flow; logout reuses the pairing worker.
     ' Both flags are session-flow state with no store counterpart.
@@ -180,6 +184,17 @@ sub init()
     if libraryHero <> invalid then libraryHero.callFunc("SetStores", m.storeHost, m.top)
     calendarHero = m.calendarScreen.FindNode("hero")
     if calendarHero <> invalid then calendarHero.callFunc("SetStores", m.storeHost, m.top)
+end sub
+
+sub onScreenFadeState()
+    if m.screenFade = invalid or m.screenFade.state <> "stopped" then return
+    interp = m.top.FindNode("screenFadeInterp")
+    if interp = invalid then return
+    target = StringOf(interp.fieldToInterp)
+    dot = target.InStr(".")
+    if dot <= 0 then return
+    node = m.top.FindNode(target.Left(dot))
+    if node <> invalid then node.opacity = 1.0
 end sub
 
 sub Notify(text as string, kind = "info" as string)

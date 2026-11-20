@@ -46,6 +46,8 @@ sub init()
     m.providerPill = m.top.FindNode("providerPill")
     m.providerSegments = m.top.FindNode("providerSegments")
     m.streamsPlaceholder = m.top.FindNode("streamsPlaceholder")
+    m.streamsSkeleton = m.top.FindNode("streamsSkeleton")
+    m.streamsSkeleton.layout = { kind: "cards", x: 760, y: 180, rows: 2, tileW: 1080, tileH: 300, gapY: 32 }
     m.bg = m.top.FindNode("streamBg")
     m.scrim = m.top.FindNode("bgScrim")
     t = Theme()
@@ -198,6 +200,9 @@ sub ApplyLogoPresentation()
     end if
     ready = m.logoLoader.ready = true or m.logoLoader.status = "ready" or (m.heroLogo.uri = logo and m.heroLogo.loadStatus = "ready")
     if ready
+        ' The logo's own proportions inside its 560x360 slot, left-aligned
+        ' with the text column and vertically centered in the slot.
+        FitImageToBox(m.heroLogo, 80, 72, 560, 360, "left", "center")
         if m.heroLogo.visible <> true then m.heroLogo.visible = true
         if m.headTitle.visible <> false then m.headTitle.visible = false
     else
@@ -605,7 +610,9 @@ sub RenderActiveProvider()
     if m.streams.Count() = 0
         EmptyStreamsList()
         label = ProviderEmptyLabel()
-        if label = ""
+        pending = isTaskPending(m.activeIndex)
+        m.streamsSkeleton.active = pending
+        if label = "" or pending
             m.streamsPlaceholder.visible = false
         else
             m.streamsPlaceholder.text = label
@@ -616,6 +623,7 @@ sub RenderActiveProvider()
     end if
 
     m.streamsPlaceholder.visible = false
+    m.streamsSkeleton.active = false
 
     restorePosition = invalid
     if m.listFilled and m.streamsList.rowItemFocused <> invalid and m.streamsList.rowItemFocused.Count() >= 2
@@ -958,6 +966,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
 end function
 
 function OnExit() as void
+    m.streamsSkeleton.active = false
     CancelStreamsLoad()
     CancelEpisodeLoad()
     ' A pop leaves the picker visit. Drop stream and card caches so a later push

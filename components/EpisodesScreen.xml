@@ -46,9 +46,9 @@
             translation="[162, 48]"
             width="820"
             height="460"
-            loadWidth="560"
-            loadHeight="360"
-            loadDisplayMode="scaleToFit"
+            loadWidth="820"
+            loadHeight="460"
+            loadDisplayMode="limitSize"
             visible="false" />
         <Label
             id="epName"
@@ -114,6 +114,8 @@
              The list starts low enough that the second visible card dips its
              feet past the screen edge — a cut card is its own hint that the
              season continues below. -->
+        <!-- Ghost episode cards while the season list loads. -->
+        <SkeletonView id="epSkeleton" />
         <RowList
             id="epList"
             translation="[80, 560]"

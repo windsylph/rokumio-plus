@@ -9,6 +9,8 @@ sub init()
     m.heading = m.top.FindNode("calendarHeading")
     m.grid = m.top.FindNode("calendarGrid")
     m.status = m.top.FindNode("calendarStatus")
+    m.skeleton = m.top.FindNode("calendarSkeleton")
+    m.skeleton.layout = { kind: "rows", x: 90, y: 140, rows: 2, cols: 4, tileW: 270, tileH: 405, gapX: 18, gapY: 20, captions: true, panel: { x: 1296, y: 60, w: 564, h: 980 } }
     t = Theme()
     m.heading.color = t.textPrimary
     m.status.color = t.textSecondary
@@ -45,6 +47,7 @@ end function
 
 function OnExit() as void
     CancelTask()
+    m.skeleton.active = false
 end function
 
 function OnBackPressed() as boolean
@@ -114,8 +117,11 @@ sub Load()
         return
     end if
     m.loadKey = key
-    m.status.text = Lang("calendar", "loading")
-    m.status.visible = true
+    m.status.text = ""
+    m.status.visible = false
+    m.grid.visible = false
+    if m.hero <> invalid then m.hero.visible = false
+    m.skeleton.active = true
 
     ' Parallel batches: each task walks its own slice of the series, so a
     ' 40-series library costs ~10 sequential requests instead of 40.
@@ -149,6 +155,7 @@ sub Load()
 end sub
 
 sub ShowEmpty(text as string)
+    m.skeleton.active = false
     m.days = []
     m.grid.content = CreateObject("roSGNode", "ContentNode")
     m.grid.visible = false
@@ -193,6 +200,7 @@ sub RenderSchedule(entries as object)
         ShowEmpty(Lang("calendar", "nothingScheduled"))
         return
     end if
+    m.skeleton.active = false
 
     ' Group into days (entries arrive sorted by date).
     days = []

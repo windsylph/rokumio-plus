@@ -48,7 +48,7 @@
             height="360"
             loadWidth="560"
             loadHeight="360"
-            loadDisplayMode="scaleToFit"
+            loadDisplayMode="limitSize"
             visible="false" />
         <Label
             id="headTitle"
@@ -138,6 +138,8 @@
         <Group
             id="providerSegments"
             translation="[760, 156]" />
+        <!-- Ghost stream cards while the selected add-on is still answering. -->
+        <SkeletonView id="streamsSkeleton" />
         <RowList
             id="streamsList"
             translation="[760, 180]"

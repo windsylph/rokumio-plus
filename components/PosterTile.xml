@@ -113,6 +113,8 @@
         <Poster id="focusRing" width="270" height="405" translation="[0, 0]" uri="pkg:/images/ui/focus_ring_inner.9.png" blendColor="0xFFFFFFF2" visible="false" />
         <!-- Title under the artwork, as on Stremio's board (title-bar 4rem).
              Drawn below the cell; screens leave room for it in their row gap. -->
+        <!-- Ghost caption bar shown while the artwork is still on its way. -->
+        <Poster id="captionGhost" width="162" height="18" translation="[54, 420]" uri="pkg:/images/ui/card_sm.9.png" blendColor="0xFFFFFF14" visible="false" />
         <Label id="caption" width="270" height="64" translation="[0, 414]" horizAlign="center" vertAlign="top" wrap="true" maxLines="2" font="font:SmallestSystemFont" />
     </children>
 </component>
