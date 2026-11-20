@@ -1017,11 +1017,8 @@ sub FocusRail()
     SetRailExpanded(true)
     m.rail.GetChild(m.railFocusIndex).focused = true
     m.rail.GetChild(m.railFocusIndex).SetFocus(true)
-    if m.railExpandAnim <> invalid
-        m.railCollapseAnim.control = "stop"
-        m.railExpandAnim.control = "stop"
-        m.railExpandAnim.control = "start"
-    end if
+    ' No rail width animation: the Stremio nav bar never widens (and its
+    ' backdrop is transparent), so animating it was pure render work.
 end sub
 
 sub CollapseRail()
@@ -1031,11 +1028,7 @@ sub CollapseRail()
     end if
     m.railFocusIndex = -1
     SetRailExpanded(false)
-    if m.railCollapseAnim <> invalid
-        m.railExpandAnim.control = "stop"
-        m.railCollapseAnim.control = "stop"
-        m.railCollapseAnim.control = "start"
-    end if
+    ' (No collapse animation either; see FocusRail.)
 end sub
 
 sub SetRailExpanded(expanded as boolean)

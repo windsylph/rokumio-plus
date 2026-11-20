@@ -5,7 +5,7 @@
 # requests pass COEP, an optional local test add-on at /addon/manifest.json
 # (streams web/test.mp4, see make-test-video.sh), and /save/<name>.png for
 # display captures.
-import http.server, socketserver, sys, urllib.request, urllib.parse, os, threading, webbrowser
+import http.server, socketserver, sys, urllib.request, urllib.error, urllib.parse, os, threading, webbrowser
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
 class H(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *a, **k): super().__init__(*a, directory=ROOT, **k)
@@ -70,20 +70,35 @@ class H(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/addon/"): return self.addon()
         if self.path.split("?")[0] == "/test.mp4": return self.video()
-        if self.path.startswith("/proxy/"):
-            url = self.path[len("/proxy/"):]
-            if not url.startswith("http"): url = urllib.parse.unquote(url)
-            try:
-                req = urllib.request.Request(url, headers={"User-Agent": "Roku/DVP-15.3"})
-                with urllib.request.urlopen(req, timeout=20) as r:
-                    body = r.read(); ctype = r.headers.get("Content-Type", "application/octet-stream")
-                self.send_response(200); self.send_header("Content-Type", ctype)
-                self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
-            except Exception as e:
-                msg = str(e).encode(); self.send_response(502); self.send_header("Content-Length", str(len(msg))); self.end_headers(); self.wfile.write(msg)
-            return
+        if self.path.startswith("/proxy/"): return self.forward("GET")
         return super().do_GET()
+    def forward(self, method):
+        # Same-origin proxy for the app's network calls. Forwards the method,
+        # body and content headers, and passes the upstream status and body
+        # through untouched: the Stremio account API (addonCollectionGet,
+        # datastoreGet, ...) is POST, and the app reads real 4xx/5xx answers.
+        url = self.path[len("/proxy/"):]
+        if not url.startswith("http"): url = urllib.parse.unquote(url)
+        body = None
+        if method == "POST":
+            n = int(self.headers.get("Content-Length", "0") or "0")
+            body = self.rfile.read(n) if n > 0 else b""
+        headers = {"User-Agent": "Roku/DVP-15.3"}
+        for h in ("Content-Type", "Accept", "Authorization", "Range"):
+            if self.headers.get(h): headers[h] = self.headers.get(h)
+        status, ctype, data = 502, "text/plain", b""
+        try:
+            req = urllib.request.Request(url, data=body, headers=headers, method=method)
+            with urllib.request.urlopen(req, timeout=60) as r:
+                status, ctype, data = r.status, r.headers.get("Content-Type", "application/octet-stream"), r.read()
+        except urllib.error.HTTPError as e:
+            status, ctype, data = e.code, e.headers.get("Content-Type", "text/plain"), e.read()
+        except Exception as e:
+            data = str(e).encode()
+        self.send_response(status); self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
     def do_POST(self):
+        if self.path.startswith("/proxy/"): return self.forward("POST")
         # /save/<name>.png — the page posts a capture of the display buffer.
         if self.path.startswith("/save/"):
             name = os.path.basename(self.path[len("/save/"):])

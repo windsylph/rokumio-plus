@@ -16,7 +16,13 @@ sub init()
     m.grid.rowLabelColor = t.accent
     m.grid.ObserveField("rowItemFocused", "onFocused")
     m.grid.ObserveField("rowItemSelected", "onSelected")
-    m.task = invalid
+    m.tasks = []
+    m.pending = 0
+    m.loaded = []
+    m.loadKey = ""
+    ' Last schedule built, reused for 15 minutes while the Library is unchanged
+    ' so reopening the Calendar is instant and costs no requests.
+    m.cache = invalid
     m.days = []
     m.cinemetaAddress = ""
 end sub
@@ -27,7 +33,7 @@ function OnEnter(params as object) as void
     ' Back from Details re-enters with invalid params: keep the schedule and
     ' the focused tile instead of refetching every series.
     if params = invalid
-        if m.task <> invalid then return
+        if m.tasks.Count() > 0 then return
         if m.days.Count() > 0
             m.grid.SetFocus(true)
             return
@@ -57,12 +63,20 @@ function CinemetaAddress() as string
 end function
 
 sub CancelTask()
-    if m.task <> invalid
-        task = m.task
-        m.task = invalid
+    for each task in m.tasks
         AsyncTask_Reap(task, m.top, true)
-    end if
+    end for
+    m.tasks = []
+    m.pending = 0
 end sub
+
+function CALENDAR_BATCHES() as integer
+    return 4
+end function
+
+function CALENDAR_CACHE_SECONDS() as integer
+    return 900
+end function
 
 ' yyyy-mm-dd for today + offsetDays, in the device's local time.
 function IsoDay(offsetDays as integer) as string
@@ -90,15 +104,48 @@ sub Load()
         ShowEmpty(Lang("calendar", "emptyLibrary"))
         return
     end if
+    m.today = IsoDay(0)
+    key = m.today
+    for each item in series
+        key = key + "|" + StringOf(item.metaId)
+    end for
+    if m.cache <> invalid and m.cache.key = key and UpTime(0) - m.cache.at < CALENDAR_CACHE_SECONDS()
+        RenderSchedule(m.cache.entries)
+        return
+    end if
+    m.loadKey = key
     m.status.text = Lang("calendar", "loading")
     m.status.visible = true
-    m.today = IsoDay(0)
-    m.task = AsyncTask_Launch(m.top, "CalendarTask", "onLoaded", {
-        addonAddress: m.cinemetaAddress
-        series: series
-        fromDate: IsoDay(-7)
-        toDate: IsoDay(30)
-    }, "calendarLoader")
+
+    ' Parallel batches: each task walks its own slice of the series, so a
+    ' 40-series library costs ~10 sequential requests instead of 40.
+    batches = CALENDAR_BATCHES()
+    if series.Count() < batches then batches = series.Count()
+    slices = []
+    for b = 0 to batches - 1
+        slices.Push([])
+    end for
+    for i = 0 to series.Count() - 1
+        slices[i MOD batches].Push(series[i])
+    end for
+    m.loaded = []
+    m.pending = batches
+    fromDate = IsoDay(-7)
+    toDate = IsoDay(30)
+    for b = 0 to batches - 1
+        task = AsyncTask_Launch(m.top, "CalendarTask", "onLoaded", {
+            addonAddress: m.cinemetaAddress
+            series: slices[b]
+            fromDate: fromDate
+            toDate: toDate
+        }, "calendarLoader" + b.ToStr())
+        if task <> invalid
+            m.tasks.Push(task)
+        else
+            m.pending = m.pending - 1
+        end if
+    end for
+    if m.pending <= 0 then RenderSchedule([])
 end sub
 
 sub ShowEmpty(text as string)
@@ -114,14 +161,34 @@ sub ShowEmpty(text as string)
     if m.top.screenActive then m.top.SetFocus(true)
 end sub
 
-sub onLoaded()
-    if m.task = invalid then return
-    task = m.task
-    m.task = invalid
+sub onLoaded(event as object)
+    task = event.getRoSGNode()
+    if task = invalid then return
+    ' Only tasks this load launched count; a reaped one cannot report.
+    idx = -1
+    for i = 0 to m.tasks.Count() - 1
+        if m.tasks[i].IsSameNode(task) then idx = i
+    end for
+    if idx < 0 then return
+    m.tasks.Delete(idx)
     result = task.result
     AsyncTask_Reap(task, m.top, false)
-    entries = []
-    if result <> invalid and result.entries <> invalid then entries = result.entries
+    if result <> invalid and result.entries <> invalid
+        for each e in result.entries
+            m.loaded.Push(e)
+        end for
+    end if
+    m.pending = m.pending - 1
+    if m.pending > 0 then return
+
+    entries = m.loaded
+    m.loaded = []
+    entries.SortBy("date")
+    m.cache = { key: m.loadKey, entries: entries, at: UpTime(0) }
+    RenderSchedule(entries)
+end sub
+
+sub RenderSchedule(entries as object)
     if entries.Count() = 0
         ShowEmpty(Lang("calendar", "nothingScheduled"))
         return
