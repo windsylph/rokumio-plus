@@ -50,8 +50,9 @@ keyboard as the remote:
 | \* (options) | Insert (or Ctrl+8) |
 | Text in keyboard dialogs | type letters and digits |
 
-Stop it with Ctrl+C in the terminal. After changing code, stop and run
-`npm run sim` again (it rebuilds).
+Stop it with Ctrl+C in the terminal (or `npm run sim:stop` from any terminal).
+After changing code, stop and run `npm run sim` again (it rebuilds). Only one
+simulator can run at a time; "port already in use" means one is still running.
 
 **Trying playback:** run `npm run sim:video` once (macOS: converts a built-in
 wallpaper video to `tools/simulator/web/test.mp4`), then in the app go to

@@ -131,7 +131,21 @@ Test add-on for playback: install  http://localhost:{PORT}/addon/manifest.json
   in Add-ons > Add add-on (needs web/test.mp4: npm run sim:video).
 """
 socketserver.ThreadingTCPServer.allow_reuse_address = True
-with socketserver.ThreadingTCPServer(("127.0.0.1", PORT), H) as srv:
+try:
+    srv = socketserver.ThreadingTCPServer(("127.0.0.1", PORT), H)
+except OSError as e:
+    if getattr(e, "errno", None) == 48 or "in use" in str(e):
+        print(f"""
+Port {PORT} is already in use — another simulator is probably still running
+(in another terminal tab). Stop it with Ctrl+C in that tab, or run:
+
+    npm run sim:stop
+
+then start again with:  npm run sim
+""", flush=True)
+        sys.exit(1)
+    raise
+with srv:
     print(HELP, flush=True)
     if "--no-open" not in sys.argv:
         threading.Timer(1.0, lambda: webbrowser.open(f"http://localhost:{PORT}/")).start()

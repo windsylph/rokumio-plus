@@ -9,7 +9,8 @@
         "test": "npm run check:proxy && node tests/run.js && node tools/mock-addon-server/server.test.js",
         "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true }); require('fs').rmSync('out', { recursive: true, force: true }); require('fs').rmSync('out-test', { recursive: true, force: true })\"",
         "sim": "npm run build && node tools/simulator/setup.js && python3 tools/simulator/server.py",
-        "sim:video": "sh tools/simulator/make-test-video.sh"
+        "sim:video": "sh tools/simulator/make-test-video.sh",
+        "sim:stop": "node tools/simulator/stop.js"
     },
     "devDependencies": {
         "@rokucommunity/brs": "^0.47.4",
